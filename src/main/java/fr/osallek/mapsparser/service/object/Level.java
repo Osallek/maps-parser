@@ -1,2 +1,5 @@
-package fr.osallek.mapsparser.service.object;public enum Level {
+package fr.osallek.mapsparser.service.object;
+
+public enum Level {
+    COMMUNE, DEPARTEMENT, REGION
 }

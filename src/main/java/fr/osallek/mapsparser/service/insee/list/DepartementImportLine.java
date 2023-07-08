@@ -5,14 +5,14 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang3.StringUtils;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public record CommuneImportLine(@JsonProperty("TYPECOM") String type, @JsonProperty("COM") String id, @JsonProperty("DEP") String departement,
-                                @JsonProperty("LIBELLE") String name) {
+public record DepartementImportLine(@JsonProperty("CHEFLIEU") String chefLieu, @JsonProperty("DEP") String id, @JsonProperty("REG") String region,
+                                    @JsonProperty("LIBELLE") String name) {
 
-    public CommuneImportLine(@JsonProperty("TYPECOM") String type, @JsonProperty("COM") String id, @JsonProperty("DEP") String departement,
-                             @JsonProperty("LIBELLE") String name) {
-        this.type = StringUtils.normalizeSpace(StringUtils.trimToNull(type));
+    public DepartementImportLine(@JsonProperty("CHEFLIEU") String chefLieu, @JsonProperty("DEP") String id, @JsonProperty("REG") String region,
+                                 @JsonProperty("LIBELLE") String name) {
+        this.chefLieu = StringUtils.normalizeSpace(StringUtils.trimToNull(chefLieu));
         this.id = StringUtils.normalizeSpace(StringUtils.trimToNull(id));
-        this.departement = StringUtils.normalizeSpace(StringUtils.trimToNull(departement));
+        this.region = StringUtils.normalizeSpace(StringUtils.trimToNull(region));
         this.name = StringUtils.capitalize(StringUtils.normalizeSpace(StringUtils.trimToNull(name)));
     }
 }

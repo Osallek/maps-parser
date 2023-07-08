@@ -1,9 +1,7 @@
 package fr.osallek.mapsparser.service.insee.list;
 
-import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.MappingIterator;
 import com.fasterxml.jackson.databind.ObjectReader;
-import com.fasterxml.jackson.dataformat.csv.CsvGenerator;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import fr.osallek.mapsparser.common.Constants;
 import fr.osallek.mapsparser.service.GenerationService;
@@ -28,7 +26,7 @@ import java.util.stream.Collectors;
 
 @Service
 @Order(Ordered.HIGHEST_PRECEDENCE)
-public class ListSource extends GenerationService {
+public class ListGenerationService extends GenerationService {
 
     private final ObjectReader communesReader;
 
@@ -36,14 +34,8 @@ public class ListSource extends GenerationService {
 
     private final ObjectReader regionsReader;
 
-    public ListSource() {
+    public ListGenerationService(CsvMapper csvMapper) {
         super("INSEE", "https://www.insee.fr");
-
-        CsvMapper csvMapper = CsvMapper.builder()
-                                       .findAndAddModules()
-                                       .enable(CsvGenerator.Feature.ALWAYS_QUOTE_STRINGS)
-                                       .enable(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES)
-                                       .build();
 
         this.communesReader = csvMapper.readerFor(CommuneImportLine.class)
                                        .with(csvMapper.schemaFor(CommuneImportLine.class).withHeader().withColumnReordering(true).withColumnSeparator(','));
