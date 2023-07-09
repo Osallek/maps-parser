@@ -56,9 +56,9 @@ public class MapsParserService implements ApplicationListener<ApplicationReadyEv
             readData();
 
             for (GenerationService generationService : this.generationServices) {
-                LOGGER.info("Doing {}", generationService.getClass().getCanonicalName());
+                LOGGER.info("Doing {}", generationService.getClass().getSimpleName());
                 generationService.addData(this.data);
-                LOGGER.info("Done {}", generationService.getClass().getCanonicalName());
+                LOGGER.info("Done {}", generationService.getClass().getSimpleName());
             }
 
             writeData();

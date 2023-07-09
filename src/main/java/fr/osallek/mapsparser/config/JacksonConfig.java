@@ -1,6 +1,7 @@
 package fr.osallek.mapsparser.config;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.json.JsonWriteFeature;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -49,6 +50,7 @@ public class JacksonConfig {
                          .enable(MapperFeature.ACCEPT_CASE_INSENSITIVE_ENUMS)
                          .enable(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES)
                          .enable(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY)
+                         .enable(JsonGenerator.Feature.WRITE_BIGDECIMAL_AS_PLAIN)
                          .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
                          .build()
                          .setDefaultPropertyInclusion(JsonInclude.Include.NON_EMPTY);

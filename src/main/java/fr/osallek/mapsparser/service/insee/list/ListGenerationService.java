@@ -13,6 +13,7 @@ import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
 import java.io.FileInputStream;
@@ -34,8 +35,8 @@ public class ListGenerationService extends GenerationService {
 
     private final ObjectReader regionsReader;
 
-    public ListGenerationService(CsvMapper csvMapper) {
-        super("INSEE", "https://www.insee.fr");
+    public ListGenerationService(CsvMapper csvMapper, Environment environment) {
+        super("INSEE", "https://www.insee.fr", environment);
 
         this.communesReader = csvMapper.readerFor(CommuneImportLine.class)
                                        .with(csvMapper.schemaFor(CommuneImportLine.class).withHeader().withColumnReordering(true).withColumnSeparator(','));
@@ -53,8 +54,6 @@ public class ListGenerationService extends GenerationService {
         Path regionsCsv = Constants.SOURCES_FOLDER.resolve("region.csv");
 
         if (Files.exists(regionsCsv)) {
-            this.logger.info("Reading regions");
-
             try {
                 MappingIterator<RegionImportLine> it = this.regionsReader.readValues(new InputStreamReader(new FileInputStream(regionsCsv.toFile())));
 
@@ -66,6 +65,10 @@ public class ListGenerationService extends GenerationService {
                     RegionImportLine current = it.next();
 
                     if (StringUtils.isNotBlank(current.id())) {
+                        if (current.id().charAt(0) == '0') {
+                            continue; //Ignore DROM-COM
+                        }
+
                         data.getRegions().compute(current.id(), (id, region) -> {
                             if (region == null) {
                                 region = new Region(current.id(), current.name(), current.chefLieu());
@@ -86,8 +89,6 @@ public class ListGenerationService extends GenerationService {
         Path departementsCsv = Constants.SOURCES_FOLDER.resolve("departement.csv");
 
         if (Files.exists(departementsCsv)) {
-            this.logger.info("Reading departements");
-
             try {
                 MappingIterator<DepartementImportLine> it = this.departementsReader.readValues(
                         new InputStreamReader(new FileInputStream(departementsCsv.toFile())));
@@ -100,6 +101,10 @@ public class ListGenerationService extends GenerationService {
                     DepartementImportLine current = it.next();
 
                     if (StringUtils.isNotBlank(current.id())) {
+                        if (current.id().charAt(0) == '9' && current.id().charAt(1) == '7') {
+                            continue; //Ignore DROM-COM
+                        }
+
                         data.getDepartements().compute(current.id(), (id, departement) -> {
                             if (departement == null) {
                                 departement = new Departement(current.id(), current.name(), current.region(), current.chefLieu());
@@ -133,8 +138,6 @@ public class ListGenerationService extends GenerationService {
         Path communesCsv = Constants.SOURCES_FOLDER.resolve("commune.csv");
 
         if (Files.exists(communesCsv)) {
-            this.logger.info("Reading communes");
-
             try {
                 MappingIterator<CommuneImportLine> it = this.communesReader.readValues(new InputStreamReader(new FileInputStream(communesCsv.toFile())));
 
@@ -146,6 +149,10 @@ public class ListGenerationService extends GenerationService {
                     CommuneImportLine current = it.next();
 
                     if (StringUtils.isNotBlank(current.id()) && "COM".equals(current.type())) {
+                        if (current.id().charAt(0) == '9' && current.id().charAt(1) == '7') {
+                            continue; //Ignore DROM-COM
+                        }
+
                         data.getCommunes().compute(current.id(), (id, commune) -> {
                             if (commune == null) {
                                 commune = new Commune(current.id(), current.name(), current.departement());
