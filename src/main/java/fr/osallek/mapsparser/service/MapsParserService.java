@@ -3,6 +3,7 @@ package fr.osallek.mapsparser.service;
 import com.aayushatharva.brotli4j.Brotli4jLoader;
 import com.aayushatharva.brotli4j.decoder.BrotliInputStream;
 import com.aayushatharva.brotli4j.encoder.BrotliOutputStream;
+import com.aayushatharva.brotli4j.encoder.Encoder;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.osallek.mapsparser.common.Constants;
 import fr.osallek.mapsparser.service.object.Data;
@@ -96,7 +97,7 @@ public class MapsParserService implements ApplicationListener<ApplicationReadyEv
         FileUtils.forceMkdir(Constants.DATA_FOLDER.toFile());
         Path tmp = Constants.DATA_FOLDER.resolve(Constants.DATA_FILE.getFileName() + ".tmp");
         try (OutputStream outputStream = Files.newOutputStream(tmp); BufferedOutputStream buffered = new BufferedOutputStream(outputStream);
-             BrotliOutputStream brotli = new BrotliOutputStream(buffered)) {
+             BrotliOutputStream brotli = new BrotliOutputStream(buffered, new Encoder.Parameters().setMode(Encoder.Mode.TEXT).setQuality(11))) {
             this.objectMapper.writeValue(brotli, this.data);
             Files.copy(tmp, Constants.DATA_PATH, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.COPY_ATTRIBUTES);
             FileUtils.deleteQuietly(tmp.toFile());
