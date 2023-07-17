@@ -187,6 +187,8 @@ public class InternGenerationService extends GenerationService {
                     return numbers;
                 }));
 
+            pops.values().forEach(Collections::sort);
+
             if (!this.environment.matchesProfiles("dev") || MapUtils.isEmpty(data.getDepartements().getJenks().getPopulation())) {
                 data.getDepartements().getJenks().doPopulation(pops);
             }
@@ -284,6 +286,8 @@ public class InternGenerationService extends GenerationService {
 
                     return numbers;
                 }));
+
+            pops.values().forEach(Collections::sort);
 
             if (!this.environment.matchesProfiles("dev") || MapUtils.isEmpty(data.getRegions().getJenks().getPopulation())) {
                 data.getRegions().getJenks().doPopulation(pops);

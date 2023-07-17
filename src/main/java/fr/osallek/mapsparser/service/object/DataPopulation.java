@@ -13,6 +13,8 @@ public class DataPopulation {
 
     protected SortedMap<Integer, Integer> countryRanks;
 
+    //% of pop for country/region/departement, stacked and pie
+
     public SortedMap<Integer, Integer> getPopulation() {
         return population;
     }
