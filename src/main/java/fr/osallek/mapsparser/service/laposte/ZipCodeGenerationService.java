@@ -40,7 +40,7 @@ public class ZipCodeGenerationService extends GenerationService {
 
     @Override
     public void addData(Data data) {
-        if (MapUtils.isNotEmpty(data.getCommunes())) {
+        if (MapUtils.isNotEmpty(data.getCommunes().getCommunes())) {
             downloadToFile(() -> this.webClient.get()
                                                .retrieve()
                                                .onStatus(Predicate.not(HttpStatusCode::is2xxSuccessful),
@@ -54,7 +54,7 @@ public class ZipCodeGenerationService extends GenerationService {
                     ZipCodeLine current = it.next();
 
                     if (StringUtils.isNotBlank(current.id())) {
-                        Commune commune = data.getCommunes().get(current.id());
+                        Commune commune = data.getCommunes().getCommunes().get(current.id());
 
                         if (commune != null) {
                             if (StringUtils.isNotBlank(current.zipCode())) {

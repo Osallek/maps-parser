@@ -16,7 +16,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
@@ -37,7 +36,7 @@ public class PopulationGenerationService extends GenerationService {
     @Override
     public void addData(Data data) {
         try {
-            if (MapUtils.isNotEmpty(data.getCommunes())) {
+            if (MapUtils.isNotEmpty(data.getCommunes().getCommunes())) {
                 try (FileInputStream fileInputStream = new FileInputStream(Constants.SOURCES_FOLDER.resolve("populationHistory-1876-2020.csv").toFile());
                      InputStreamReader bufferedReader = new InputStreamReader(fileInputStream, StandardCharsets.ISO_8859_1)) {
                     MappingIterator<PopulationHistoryImportLine> it = this.reader.readValues(bufferedReader);
@@ -50,20 +49,20 @@ public class PopulationGenerationService extends GenerationService {
                             Commune commune;
 
                             if (current.id().startsWith("75")) {
-                                commune = data.getCommunes().get("75056");
+                                commune = data.getCommunes().getCommunes().get("75056");
 
                                 if (!paris && commune != null) {
                                     paris = true;
-                                    if (MapUtils.isNotEmpty(commune.getPopulation())) {
-                                        commune.getPopulation().clear();
+                                    if (commune.getPopulation() != null && MapUtils.isNotEmpty(commune.getPopulation().getPopulation())) {
+                                        commune.getPopulation().getPopulation().clear();
                                     }
                                 }
                             } else {
-                                commune = data.getCommunes().get(current.id());
+                                commune = data.getCommunes().getCommunes().get(current.id());
 
                                 if (commune != null) {
-                                    if (MapUtils.isNotEmpty(commune.getPopulation())) {
-                                        commune.getPopulation().clear();
+                                    if (commune.getPopulation() != null && MapUtils.isNotEmpty(commune.getPopulation().getPopulation())) {
+                                        commune.getPopulation().getPopulation().clear();
                                     }
                                 }
                             }
@@ -108,28 +107,28 @@ public class PopulationGenerationService extends GenerationService {
                     }
                 }
 
-                if (MapUtils.isNotEmpty(data.getDepartements())) {
-                    for (Departement departement : data.getDepartements().values()) {
-                        if (MapUtils.isNotEmpty(departement.getPopulation())) {
-                            departement.getPopulation().clear();
+                if (MapUtils.isNotEmpty(data.getDepartements().getDepartements())) {
+                    for (Departement departement : data.getDepartements().getDepartements().values()) {
+                        if (departement.getPopulation() != null && MapUtils.isNotEmpty(departement.getPopulation().getPopulation())) {
+                            departement.getPopulation().getPopulation().clear();
                         }
 
-                        departement.getCommunes().stream().map(s -> data.getCommunes().get(s)).filter(Objects::nonNull).forEach(commune -> {
-                            if (MapUtils.isNotEmpty(commune.getPopulation())) {
-                                commune.getPopulation().forEach(departement::addPopulation);
+                        departement.getCommunes().stream().map(s -> data.getCommunes().getCommunes().get(s)).filter(Objects::nonNull).forEach(commune -> {
+                            if (commune.getPopulation() != null && MapUtils.isNotEmpty(commune.getPopulation().getPopulation())) {
+                                commune.getPopulation().getPopulation().forEach(departement::addPopulation);
                             }
                         });
                     }
 
-                    if (MapUtils.isNotEmpty(data.getRegions())) {
-                        for (Region region : data.getRegions().values()) {
-                            if (MapUtils.isNotEmpty(region.getPopulation())) {
-                                region.getPopulation().clear();
+                    if (MapUtils.isNotEmpty(data.getRegions().getRegions())) {
+                        for (Region region : data.getRegions().getRegions().values()) {
+                            if (region.getPopulation() != null && MapUtils.isNotEmpty(region.getPopulation().getPopulation())) {
+                                region.getPopulation().getPopulation().clear();
                             }
 
-                            region.getDepartements().stream().map(s -> data.getDepartements().get(s)).filter(Objects::nonNull).forEach(departement -> {
-                                if (MapUtils.isNotEmpty(departement.getPopulation())) {
-                                    departement.getPopulation().forEach(region::addPopulation);
+                            region.getDepartements().stream().map(s -> data.getDepartements().getDepartements().get(s)).filter(Objects::nonNull).forEach(departement -> {
+                                if (departement.getPopulation() != null && MapUtils.isNotEmpty(departement.getPopulation().getPopulation())) {
+                                    departement.getPopulation().getPopulation().forEach(region::addPopulation);
                                 }
                             });
                         }

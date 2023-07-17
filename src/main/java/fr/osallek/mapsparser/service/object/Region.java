@@ -5,14 +5,14 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.Collection;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class Region extends DataNode {
+public class Region extends DataNode<DataPopulation> {
 
     private String chefLieu;
 
     private Collection<String> departements;
 
     public Region(String id, String name, String chefLieu) {
-        super(id, name, Level.REGION);
+        super(id, name, Level.REGION, DataPopulation::new);
         this.chefLieu = chefLieu;
     }
 

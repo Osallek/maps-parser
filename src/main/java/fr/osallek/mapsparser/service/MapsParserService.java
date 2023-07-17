@@ -7,16 +7,6 @@ import com.aayushatharva.brotli4j.encoder.Encoder;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.osallek.mapsparser.common.Constants;
 import fr.osallek.mapsparser.service.object.Data;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.FilenameUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.boot.ExitCodeGenerator;
-import org.springframework.boot.context.event.ApplicationReadyEvent;
-import org.springframework.context.ApplicationListener;
-import org.springframework.core.env.Environment;
-import org.springframework.stereotype.Service;
-
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.IOException;
@@ -26,6 +16,15 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.boot.ExitCodeGenerator;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.ApplicationListener;
+import org.springframework.core.env.Environment;
+import org.springframework.stereotype.Service;
 
 @Service
 public class MapsParserService implements ApplicationListener<ApplicationReadyEvent>, ExitCodeGenerator {
@@ -68,6 +67,8 @@ public class MapsParserService implements ApplicationListener<ApplicationReadyEv
         } catch (Exception e) {
             LOGGER.error("An error occurred while running: {}", e.getMessage(), e);
             this.e = e;
+        } finally {
+            Constants.EXECUTOR.shutdown();
         }
     }
 

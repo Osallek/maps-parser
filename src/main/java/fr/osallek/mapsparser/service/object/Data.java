@@ -7,33 +7,45 @@ import java.util.SortedMap;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Data {
 
-    private SortedMap<String, Commune> communes; //Sorted only to be easier to explore manually
+    private Communes communes;
 
-    private SortedMap<String, Departement> departements; //Sorted only to be easier to explore manually
+    private Departements departements;
 
-    private SortedMap<String, Region> regions; //Sorted only to be easier to explore manually
+    private Regions regions;
 
-    public SortedMap<String, Commune> getCommunes() {
+    public Communes getCommunes() {
+        if (this.communes == null) {
+            this.communes = new Communes();
+        }
+
         return communes;
     }
 
-    public void setCommunes(SortedMap<String, Commune> communes) {
+    public void setCommunes(Communes communes) {
         this.communes = communes;
     }
 
-    public SortedMap<String, Departement> getDepartements() {
+    public Departements getDepartements() {
+        if (this.departements == null) {
+            this.departements = new Departements();
+        }
+
         return departements;
     }
 
-    public void setDepartements(SortedMap<String, Departement> departements) {
+    public void setDepartements(Departements departements) {
         this.departements = departements;
     }
 
-    public SortedMap<String, Region> getRegions() {
+    public Regions getRegions() {
+        if (this.regions == null) {
+            this.regions = new Regions();
+        }
+
         return regions;
     }
 
-    public void setRegions(SortedMap<String, Region> regions) {
+    public void setRegions(Regions regions) {
         this.regions = regions;
     }
 }

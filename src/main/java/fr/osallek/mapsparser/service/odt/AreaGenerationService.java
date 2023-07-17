@@ -34,7 +34,7 @@ public class AreaGenerationService extends GenerationService {
     @Override
     public void addData(Data data) {
         try {
-            if (MapUtils.isNotEmpty(data.getCommunes())) {
+            if (MapUtils.isNotEmpty(data.getCommunes().getCommunes())) {
                 MappingIterator<AreaImportLine> it = this.reader.readValues(BOMInputStream.builder()
                                                                                           .setInputStream(new FileInputStream(
                                                                                                   Constants.SOURCES_FOLDER.resolve("superficie_communes.csv")
@@ -45,7 +45,7 @@ public class AreaGenerationService extends GenerationService {
                     AreaImportLine current = it.next();
 
                     if (StringUtils.isNotBlank(current.id())) {
-                        Commune commune = data.getCommunes().get(current.id());
+                        Commune commune = data.getCommunes().getCommunes().get(current.id());
 
                         if (commune != null && (current.area() != null)) {
                             commune.setArea(current.area());
@@ -54,7 +54,7 @@ public class AreaGenerationService extends GenerationService {
                 }
             }
 
-            if (MapUtils.isNotEmpty(data.getDepartements())) {
+            if (MapUtils.isNotEmpty(data.getDepartements().getDepartements())) {
                 MappingIterator<AreaImportLine> it = this.reader.readValues(BOMInputStream.builder()
                                                                                           .setInputStream(new FileInputStream(Constants.SOURCES_FOLDER.resolve(
                                                                                                   "superficie_departements.csv").toFile()))
@@ -64,7 +64,7 @@ public class AreaGenerationService extends GenerationService {
                     AreaImportLine current = it.next();
 
                     if (StringUtils.isNotBlank(current.id())) {
-                        Departement departement = data.getDepartements().get(current.id());
+                        Departement departement = data.getDepartements().getDepartements().get(current.id());
 
                         if (departement != null && (current.area() != null)) {
                             departement.setArea(current.area());
@@ -73,7 +73,7 @@ public class AreaGenerationService extends GenerationService {
                 }
             }
 
-            if (MapUtils.isNotEmpty(data.getRegions())) {
+            if (MapUtils.isNotEmpty(data.getRegions().getRegions())) {
                 MappingIterator<AreaImportLine> it = this.reader.readValues(BOMInputStream.builder()
                                                                                           .setInputStream(new FileInputStream(Constants.SOURCES_FOLDER.resolve(
                                                                                                   "superficie_regions.csv").toFile()))
@@ -83,7 +83,7 @@ public class AreaGenerationService extends GenerationService {
                     AreaImportLine current = it.next();
 
                     if (StringUtils.isNotBlank(current.id())) {
-                        Region region = data.getRegions().get(current.id());
+                        Region region = data.getRegions().getRegions().get(current.id());
 
                         if (region != null && (current.area() != null)) {
                             region.setArea(current.area());

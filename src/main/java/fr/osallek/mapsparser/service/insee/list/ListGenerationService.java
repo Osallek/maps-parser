@@ -9,13 +9,6 @@ import fr.osallek.mapsparser.service.object.Commune;
 import fr.osallek.mapsparser.service.object.Data;
 import fr.osallek.mapsparser.service.object.Departement;
 import fr.osallek.mapsparser.service.object.Region;
-import org.apache.commons.collections4.MapUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.core.Ordered;
-import org.springframework.core.annotation.Order;
-import org.springframework.core.env.Environment;
-import org.springframework.stereotype.Service;
-
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -24,6 +17,12 @@ import java.nio.file.Path;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
+import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
+import org.springframework.core.env.Environment;
+import org.springframework.stereotype.Service;
 
 @Service
 @Order(Ordered.HIGHEST_PRECEDENCE)
@@ -57,8 +56,8 @@ public class ListGenerationService extends GenerationService {
             try {
                 MappingIterator<RegionImportLine> it = this.regionsReader.readValues(new InputStreamReader(new FileInputStream(regionsCsv.toFile())));
 
-                if (data.getRegions() == null) {
-                    data.setRegions(new TreeMap<>());
+                if (data.getRegions().getRegions() == null) {
+                    data.getRegions().setRegions(new TreeMap<>());
                 }
 
                 while (it.hasNext()) {
@@ -69,7 +68,7 @@ public class ListGenerationService extends GenerationService {
                             continue; //Ignore DROM-COM
                         }
 
-                        data.getRegions().compute(current.id(), (id, region) -> {
+                        data.getRegions().getRegions().compute(current.id(), (id, region) -> {
                             if (region == null) {
                                 region = new Region(current.id(), current.name(), current.chefLieu());
                             } else {
@@ -93,8 +92,8 @@ public class ListGenerationService extends GenerationService {
                 MappingIterator<DepartementImportLine> it = this.departementsReader.readValues(
                         new InputStreamReader(new FileInputStream(departementsCsv.toFile())));
 
-                if (data.getDepartements() == null) {
-                    data.setDepartements(new TreeMap<>());
+                if (data.getDepartements().getDepartements() == null) {
+                    data.getDepartements().setDepartements(new TreeMap<>());
                 }
 
                 while (it.hasNext()) {
@@ -105,7 +104,7 @@ public class ListGenerationService extends GenerationService {
                             continue; //Ignore DROM-COM
                         }
 
-                        data.getDepartements().compute(current.id(), (id, departement) -> {
+                        data.getDepartements().getDepartements().compute(current.id(), (id, departement) -> {
                             if (departement == null) {
                                 departement = new Departement(current.id(), current.name(), current.region(), current.chefLieu());
                             } else {
@@ -119,14 +118,15 @@ public class ListGenerationService extends GenerationService {
                     }
                 }
 
-                if (MapUtils.isNotEmpty(data.getDepartements()) && MapUtils.isNotEmpty(data.getRegions())) {
+                if (MapUtils.isNotEmpty(data.getDepartements().getDepartements()) && MapUtils.isNotEmpty(data.getRegions().getRegions())) {
                     data.getDepartements()
+                        .getDepartements()
                         .values()
                         .stream()
                         .collect(Collectors.groupingBy(Departement::getRegion, Collectors.mapping(Departement::getId, Collectors.toCollection(TreeSet::new))))
                         .forEach((region, departements) -> {
-                            if (data.getRegions().containsKey(region)) {
-                                data.getRegions().get(region).setDepartements(departements);
+                            if (data.getRegions().getRegions().containsKey(region)) {
+                                data.getRegions().getRegions().get(region).setDepartements(departements);
                             }
                         });
                 }
@@ -141,8 +141,8 @@ public class ListGenerationService extends GenerationService {
             try {
                 MappingIterator<CommuneImportLine> it = this.communesReader.readValues(new InputStreamReader(new FileInputStream(communesCsv.toFile())));
 
-                if (data.getCommunes() == null) {
-                    data.setCommunes(new TreeMap<>());
+                if (data.getCommunes().getCommunes() == null) {
+                    data.getCommunes().setCommunes(new TreeMap<>());
                 }
 
                 while (it.hasNext()) {
@@ -153,7 +153,7 @@ public class ListGenerationService extends GenerationService {
                             continue; //Ignore DROM-COM
                         }
 
-                        data.getCommunes().compute(current.id(), (id, commune) -> {
+                        data.getCommunes().getCommunes().compute(current.id(), (id, commune) -> {
                             if (commune == null) {
                                 commune = new Commune(current.id(), current.name(), current.departement());
                             } else {
@@ -166,14 +166,15 @@ public class ListGenerationService extends GenerationService {
                     }
                 }
 
-                if (MapUtils.isNotEmpty(data.getCommunes()) && MapUtils.isNotEmpty(data.getDepartements())) {
+                if (MapUtils.isNotEmpty(data.getCommunes().getCommunes()) && MapUtils.isNotEmpty(data.getDepartements().getDepartements())) {
                     data.getCommunes()
+                        .getCommunes()
                         .values()
                         .stream()
                         .collect(Collectors.groupingBy(Commune::getDepartement, Collectors.mapping(Commune::getId, Collectors.toCollection(TreeSet::new))))
                         .forEach((departement, communes) -> {
-                            if (data.getDepartements().containsKey(departement)) {
-                                data.getDepartements().get(departement).setCommunes(communes);
+                            if (data.getDepartements().getDepartements().containsKey(departement)) {
+                                data.getDepartements().getDepartements().get(departement).setCommunes(communes);
                             }
                         });
                 }

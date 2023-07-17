@@ -1,5 +1,8 @@
 package fr.osallek.mapsparser.common;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ForkJoinPool;
 import org.slf4j.Logger;
 import org.springframework.web.reactive.function.client.ClientRequest;
 import org.springframework.web.reactive.function.client.ClientResponse;
@@ -28,6 +31,8 @@ public final class Constants {
     public static final Path DATA_PATH = DATA_FOLDER.resolve(DATA_FILE);
 
     public static final Path SOURCES_FOLDER = Path.of("sources");
+
+    public static final ForkJoinPool EXECUTOR = (ForkJoinPool) Executors.newWorkStealingPool();
 
     public static Mono<Throwable> handleError(ClientResponse response, String name, Logger logger) {
         return response.bodyToMono(String.class).map(error -> {

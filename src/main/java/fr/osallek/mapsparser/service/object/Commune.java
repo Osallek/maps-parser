@@ -3,7 +3,7 @@ package fr.osallek.mapsparser.service.object;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class Commune extends DataNode {
+public class Commune extends DataNode<CommunePopulation> {
 
     private String departement;
 
@@ -12,7 +12,7 @@ public class Commune extends DataNode {
     private Point point;
 
     public Commune(String id, String name, String departement) {
-        super(id, name, Level.COMMUNE);
+        super(id, name, Level.COMMUNE, CommunePopulation::new);
         this.departement = departement;
     }
 

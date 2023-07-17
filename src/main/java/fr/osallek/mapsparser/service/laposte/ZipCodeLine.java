@@ -10,7 +10,7 @@ public record ZipCodeLine(String id, String zipCode) {
 
     @JsonCreator
     public ZipCodeLine(@JsonProperty("code_commune_insee") String id, @JsonProperty("code_postal") String zipCode) {
-        this.id = StringUtils.trimToNull(zipCode);
-        this.zipCode = StringUtils.trimToNull(id);
+        this.id = StringUtils.trimToNull(id);
+        this.zipCode = StringUtils.trimToNull(zipCode);
     }
 }
