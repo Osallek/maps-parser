@@ -11,6 +11,10 @@ public class Commune extends DataNode<CommunePopulation> {
 
     private Point point;
 
+    private Integer areaRegionRanks;
+
+    private Integer areaDepartementRanks;
+
     public Commune(String id, String name, String departement) {
         super(id, name, Level.COMMUNE, CommunePopulation::new);
         this.departement = departement;
@@ -38,5 +42,21 @@ public class Commune extends DataNode<CommunePopulation> {
 
     public void setPoint(Point point) {
         this.point = point;
+    }
+
+    public Integer getAreaRegionRanks() {
+        return areaRegionRanks;
+    }
+
+    public void setAreaRegionRanks(Integer areaRegionRanks) {
+        this.areaRegionRanks = areaRegionRanks;
+    }
+
+    public Integer getAreaDepartementRanks() {
+        return areaDepartementRanks;
+    }
+
+    public void setAreaDepartementRanks(Integer areaDepartementRanks) {
+        this.areaDepartementRanks = areaDepartementRanks;
     }
 }

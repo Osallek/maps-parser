@@ -12,6 +12,8 @@ public class Departement extends DataNode<DepartementPopulation> {
 
     private Collection<String> communes;
 
+    protected Integer areaRegionRanks;
+
     public Departement(String id, String name, String region, String chefLieu) {
         super(id, name, Level.DEPARTEMENT, DepartementPopulation::new);
         this.region = region;
@@ -40,5 +42,13 @@ public class Departement extends DataNode<DepartementPopulation> {
 
     public void setCommunes(Collection<String> communes) {
         this.communes = communes;
+    }
+
+    public Integer getAreaRegionRanks() {
+        return areaRegionRanks;
+    }
+
+    public void setAreaRegionRanks(Integer areaRegionRanks) {
+        this.areaRegionRanks = areaRegionRanks;
     }
 }
