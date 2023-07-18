@@ -54,22 +54,13 @@ public class DataNode<P extends DataPopulation> extends IdName<String, String> {
     }
 
     @JsonIgnore
-    public void setPopulation(Integer year, Integer population) {
-        if (this.population == null) {
-            this.population = this.dataPopulationSupplier.get();
-        }
-
-        this.population.setPopulation(year, population);
-    }
-
-    @JsonIgnore
     public void addPopulation(Integer year, Integer population) {
         if (this.population == null) {
             this.population = this.dataPopulationSupplier.get();
         }
 
         if (population != null) {
-            this.population.addPopulation(year, population);
+            this.population.addPopulation(year, population, this.area);
         }
     }
 }

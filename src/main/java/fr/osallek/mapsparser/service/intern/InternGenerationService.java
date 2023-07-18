@@ -1,5 +1,6 @@
 package fr.osallek.mapsparser.service.intern;
 
+import fr.osallek.mapsparser.common.CollecUtils;
 import fr.osallek.mapsparser.service.GenerationService;
 import fr.osallek.mapsparser.service.object.Commune;
 import fr.osallek.mapsparser.service.object.Data;
@@ -97,23 +98,18 @@ public class InternGenerationService extends GenerationService {
             departementsArea.values().forEach(Collections::sort);
             regionsArea.values().forEach(Collections::sort);
 
-            data.getCommunes()
-                .getCommunes()
-                .values()
-                .parallelStream()
-                .filter(commune -> commune.getArea() != null)
-                .forEach(commune -> {
-                    commune.setAreaCountryRanks(areas.size() - areas.indexOf(commune.getArea()));
+            data.getCommunes().getCommunes().values().parallelStream().filter(commune -> commune.getArea() != null).forEach(commune -> {
+                commune.setAreaCountryRanks(areas.size() - CollecUtils.rank(areas, commune.getArea()));
 
-                    Departement departement = data.getDepartements().getDepartements().get(commune.getDepartement());
+                Departement departement = data.getDepartements().getDepartements().get(commune.getDepartement());
 
-                    if (departement != null) {
-                        commune.setAreaDepartementRanks(
-                                departementsArea.get(departement.getId()).size() - departementsArea.get(departement.getId()).indexOf(commune.getArea()));
-                        commune.setAreaRegionRanks(
-                                regionsArea.get(departement.getRegion()).size() - regionsArea.get(departement.getRegion()).indexOf(commune.getArea()));
-                    }
-                });
+                if (departement != null) {
+                    commune.setAreaDepartementRanks(departementsArea.get(departement.getId()).size()
+                                                    - CollecUtils.rank(departementsArea.get(departement.getId()), commune.getArea()));
+                    commune.setAreaRegionRanks(regionsArea.get(departement.getRegion()).size()
+                                               - CollecUtils.rank(regionsArea.get(departement.getRegion()), commune.getArea()));
+                }
+            });
 
             Map<String, SortedMap<Integer, List<Double>>> departementsPops = new HashMap<>();
             Map<String, SortedMap<Integer, List<Double>>> regionsPops = new HashMap<>();
@@ -145,23 +141,57 @@ public class InternGenerationService extends GenerationService {
             data.getCommunes()
                 .getCommunes()
                 .values()
-                .parallelStream()
+                .stream()
                 .filter(commune -> commune.getPopulation() != null && MapUtils.isNotEmpty(commune.getPopulation().getPopulation()))
                 .forEach(commune -> commune.getPopulation().getPopulation().forEach((year, pop) -> {
-                    commune.getPopulation().setCountryRanks(year, pops.get(year).size() - pops.get(year).indexOf(pop.doubleValue()));
+                    commune.getPopulation().setCountryRanks(year, pops.get(year).size() - CollecUtils.rank(pops.get(year), pop.doubleValue()));
 
                     Departement departement = data.getDepartements().getDepartements().get(commune.getDepartement());
 
                     if (departement != null) {
                         commune.getPopulation()
                                .setDepartementRanks(year, departementsPops.get(commune.getDepartement()).get(year).size()
-                                                          - departementsPops.get(commune.getDepartement()).get(year).indexOf(pop.doubleValue()));
+                                                          - CollecUtils.rank(departementsPops.get(commune.getDepartement())
+                                                                                             .get(year), pop.doubleValue()));
                         commune.getPopulation()
-                               .setRegionRanks(year, regionsPops.get(departement.getRegion()).get(year).size() - regionsPops.get(departement.getRegion())
-                                                                                                                            .get(year)
-                                                                                                                            .indexOf(pop.doubleValue()));
+                               .setRegionRanks(year, regionsPops.get(departement.getRegion()).get(year).size()
+                                                     - CollecUtils.rank(regionsPops.get(departement.getRegion()).get(year), pop.doubleValue()));
                     }
                 }));
+
+            Map<Integer, List<BigDecimal>> densities = new HashMap<>();
+            data.getCommunes()
+                .getCommunes()
+                .values()
+                .stream()
+                .map(Commune::getPopulation)
+                .filter(Objects::nonNull)
+                .map(DataPopulation::getDensity)
+                .filter(MapUtils::isNotEmpty)
+                .map(Map::entrySet)
+                .flatMap(Collection::stream)
+                .forEach(entry -> densities.compute(entry.getKey(), (integer, numbers) -> {
+                    if (numbers == null) {
+                        numbers = new ArrayList<>();
+                    }
+
+                    numbers.add(entry.getValue());
+
+                    return numbers;
+                }));
+
+            densities.values().forEach(Collections::sort);
+
+            data.getCommunes()
+                .getCommunes()
+                .values()
+                .parallelStream()
+                .filter(commune -> commune.getPopulation() != null && MapUtils.isNotEmpty(commune.getPopulation().getDensity()))
+                .forEach(commune -> commune.getPopulation()
+                                           .getDensity()
+                                           .forEach((year, density) -> commune.getPopulation()
+                                                                              .setDensityCountryRanks(year, densities.get(year).size()
+                                                                                                            - CollecUtils.rank(densities.get(year), density))));
         }
 
         if (MapUtils.isNotEmpty(data.getDepartements().getDepartements())) {
@@ -222,16 +252,11 @@ public class InternGenerationService extends GenerationService {
                                                             .collect(Collectors.groupingBy(Departement::getRegion, Collectors.mapping(DataNode::getArea, Collectors.toList())));
             regionsArea.values().forEach(Collections::sort);
 
-            data.getDepartements()
-                .getDepartements()
-                .values()
-                .parallelStream()
-                .filter(departement -> departement.getArea() != null)
-                .forEach(departement -> {
-                    departement.setAreaCountryRanks(areas.size() - areas.indexOf(departement.getArea()));
-                    departement.setAreaRegionRanks(
-                            regionsArea.get(departement.getRegion()).size() - regionsArea.get(departement.getRegion()).indexOf(departement.getArea()));
-                });
+            data.getDepartements().getDepartements().values().parallelStream().filter(departement -> departement.getArea() != null).forEach(departement -> {
+                departement.setAreaCountryRanks(areas.size() - CollecUtils.rank(areas, departement.getArea()));
+                departement.setAreaRegionRanks(regionsArea.get(departement.getRegion()).size()
+                                               - CollecUtils.rank(regionsArea.get(departement.getRegion()), departement.getArea()));
+            });
 
             Map<String, SortedMap<Integer, List<Double>>> regionsPops = new HashMap<>();
             data.getDepartements()
@@ -256,12 +281,45 @@ public class InternGenerationService extends GenerationService {
                 .parallelStream()
                 .filter(departement -> departement.getPopulation() != null && MapUtils.isNotEmpty(departement.getPopulation().getPopulation()))
                 .forEach(departement -> departement.getPopulation().getPopulation().forEach((year, pop) -> {
-                    departement.getPopulation().setCountryRanks(year, pops.get(year).size() - pops.get(year).indexOf(pop.doubleValue()));
+                    departement.getPopulation().setCountryRanks(year, pops.get(year).size() - CollecUtils.rank(pops.get(year), pop.doubleValue()));
                     departement.getPopulation()
-                               .setRegionRanks(year, regionsPops.get(departement.getRegion()).get(year).size() - regionsPops.get(departement.getRegion())
-                                                                                                                            .get(year)
-                                                                                                                            .indexOf(pop.doubleValue()));
+                               .setRegionRanks(year, regionsPops.get(departement.getRegion()).get(year).size()
+                                                     - CollecUtils.rank(regionsPops.get(departement.getRegion()).get(year), pop.doubleValue()));
                 }));
+
+            Map<Integer, List<BigDecimal>> densities = new HashMap<>();
+            data.getDepartements()
+                .getDepartements()
+                .values()
+                .stream()
+                .map(Departement::getPopulation)
+                .filter(Objects::nonNull)
+                .map(DataPopulation::getDensity)
+                .filter(MapUtils::isNotEmpty)
+                .map(Map::entrySet)
+                .flatMap(Collection::stream)
+                .forEach(entry -> densities.compute(entry.getKey(), (integer, numbers) -> {
+                    if (numbers == null) {
+                        numbers = new ArrayList<>();
+                    }
+
+                    numbers.add(entry.getValue());
+
+                    return numbers;
+                }));
+
+            densities.values().forEach(Collections::sort);
+
+            data.getDepartements()
+                .getDepartements()
+                .values()
+                .parallelStream()
+                .filter(departement -> departement.getPopulation() != null && MapUtils.isNotEmpty(departement.getPopulation().getDensity()))
+                .forEach(departement -> departement.getPopulation()
+                                                   .getDensity()
+                                                   .forEach((year, density) -> departement.getPopulation()
+                                                                                          .setDensityCountryRanks(year, densities.get(year).size()
+                                                                                                                        - CollecUtils.rank(densities.get(year), density))));
         }
 
         if (MapUtils.isNotEmpty(data.getRegions().getRegions())) {
@@ -312,7 +370,7 @@ public class InternGenerationService extends GenerationService {
                 .values()
                 .parallelStream()
                 .filter(region -> region.getArea() != null)
-                .forEach(region -> region.setAreaCountryRanks(areas.size() - areas.indexOf(region.getArea())));
+                .forEach(region -> region.setAreaCountryRanks(areas.size() - CollecUtils.rank(areas, region.getArea())));
 
             data.getRegions()
                 .getRegions()
@@ -323,7 +381,42 @@ public class InternGenerationService extends GenerationService {
                                          .getPopulation()
                                          .forEach((year, pop) -> region.getPopulation()
                                                                        .setCountryRanks(year,
-                                                                                        pops.get(year).size() - pops.get(year).indexOf(pop.doubleValue()))));
+                                                                                        pops.get(year).size()
+                                                                                        - CollecUtils.rank(pops.get(year), pop.doubleValue()))));
+
+            Map<Integer, List<BigDecimal>> densities = new HashMap<>();
+            data.getRegions()
+                .getRegions()
+                .values()
+                .stream()
+                .map(Region::getPopulation)
+                .filter(Objects::nonNull)
+                .map(DataPopulation::getDensity)
+                .filter(MapUtils::isNotEmpty)
+                .map(Map::entrySet)
+                .flatMap(Collection::stream)
+                .forEach(entry -> densities.compute(entry.getKey(), (integer, numbers) -> {
+                    if (numbers == null) {
+                        numbers = new ArrayList<>();
+                    }
+
+                    numbers.add(entry.getValue());
+
+                    return numbers;
+                }));
+
+            densities.values().forEach(Collections::sort);
+
+            data.getRegions()
+                .getRegions()
+                .values()
+                .parallelStream()
+                .filter(region -> region.getPopulation() != null && MapUtils.isNotEmpty(region.getPopulation().getDensity()))
+                .forEach(region -> region.getPopulation()
+                                         .getDensity()
+                                         .forEach((year, density) -> region.getPopulation()
+                                                                           .setDensityCountryRanks(year, densities.get(year).size() - densities.get(year)
+                                                                                                                                               .indexOf(density))));
         }
     }
 }

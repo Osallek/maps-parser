@@ -26,6 +26,7 @@ package fr.osallek.mapsparser.common;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -42,7 +43,7 @@ public class Jenks {
 
     private List<Double> list;
 
-    public Jenks(List<Double> list) {
+    public Jenks(Collection<Double> list) {
         this.list = new ArrayList<>(list);
         Collections.sort(this.list);
     }

@@ -6,7 +6,6 @@ import fr.osallek.mapsparser.common.Constants;
 import fr.osallek.mapsparser.common.Jenks;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeMap;
