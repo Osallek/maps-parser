@@ -19,6 +19,8 @@ public class DataPopulation {
 
     protected SortedMap<Integer, Integer> densityCountryRanks;
 
+    protected SortedMap<Integer, Double> percentCountry;
+
     //% of pop for country/region/departement, stacked and pie
 
     public SortedMap<Integer, Integer> getPopulation() {
@@ -51,6 +53,14 @@ public class DataPopulation {
 
     public void setDensityCountryRanks(SortedMap<Integer, Integer> densityCountryRanks) {
         this.densityCountryRanks = densityCountryRanks;
+    }
+
+    public SortedMap<Integer, Double> getPercentCountry() {
+        return percentCountry;
+    }
+
+    public void setPercentCountry(SortedMap<Integer, Double> percentCountry) {
+        this.percentCountry = percentCountry;
     }
 
     @JsonIgnore
@@ -91,6 +101,17 @@ public class DataPopulation {
 
         if (rank != null) {
             this.densityCountryRanks.put(year, rank);
+        }
+    }
+
+    @JsonIgnore
+    public void setPercentCountry(Integer year, Double percent) {
+        if (this.percentCountry == null) {
+            this.percentCountry = new TreeMap<>();
+        }
+
+        if (percent != null) {
+            this.percentCountry.put(year, percent);
         }
     }
 }
