@@ -254,6 +254,10 @@ public class InternGenerationService extends GenerationService {
             departementDensities.values().stream().map(Map::values).flatMap(Collection::stream).forEach(Collections::sort);
             regionDensities.values().stream().map(Map::values).flatMap(Collection::stream).forEach(Collections::sort);
 
+            if (!this.environment.matchesProfiles("dev") || MapUtils.isEmpty(data.getCommunes().getJenks().getDensity())) {
+                data.getCommunes().getJenks().doDensity(densities);
+            }
+
             data.getCommunes()
                 .getCommunes()
                 .values()
@@ -424,6 +428,10 @@ public class InternGenerationService extends GenerationService {
             densities.values().forEach(Collections::sort);
             regionDensities.values().stream().map(Map::values).flatMap(Collection::stream).forEach(Collections::sort);
 
+            if (!this.environment.matchesProfiles("dev") || MapUtils.isEmpty(data.getDepartements().getJenks().getDensity())) {
+                data.getDepartements().getJenks().doDensity(densities);
+            }
+
             data.getDepartements()
                 .getDepartements()
                 .values()
@@ -531,6 +539,10 @@ public class InternGenerationService extends GenerationService {
                 }));
 
             densities.values().forEach(Collections::sort);
+
+            if (!this.environment.matchesProfiles("dev") || MapUtils.isEmpty(data.getRegions().getJenks().getDensity())) {
+                data.getRegions().getJenks().doDensity(densities);
+            }
 
             data.getRegions()
                 .getRegions()

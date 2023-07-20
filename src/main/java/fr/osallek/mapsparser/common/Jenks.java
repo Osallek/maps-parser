@@ -138,7 +138,7 @@ public class Jenks {
         for (int j = nbClasses; j >= 2; j--) {
             int id = (int) (lowerClassLimits[k][j]) - 2;
 
-            kclass[j - 2] = id;
+            kclass[j - 2] = Math.max(0, id);
 
             k = (int) lowerClassLimits[k][j] - 1;
         }
