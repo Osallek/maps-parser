@@ -27,7 +27,7 @@ package fr.osallek.mapsparser.common;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -41,11 +41,11 @@ import java.util.List;
  */
 public class Jenks {
 
-    private List<Double> list;
+    private final List<Number> list;
 
-    public Jenks(Collection<Double> list) {
+    public <N extends Number> Jenks(Collection<N> list) {
         this.list = new ArrayList<>(list);
-        Collections.sort(this.list);
+        this.list.sort(Comparator.comparingDouble(Number::doubleValue));
     }
 
     public Breaks computeBreaks() {
@@ -108,7 +108,7 @@ public class Jenks {
 
             for (int m = 1; m <= l; m++) {
                 int lowerClassLimit = l - m + 1;
-                double val = this.list.get(lowerClassLimit - 1);
+                double val = this.list.get(lowerClassLimit - 1).doubleValue();
 
                 sumSquares += val * val;
                 sum += val;
@@ -140,7 +140,7 @@ public class Jenks {
 
             kclass[j - 2] = Math.max(0, id);
 
-            k = (int) lowerClassLimits[k][j] - 1;
+            k = Math.max(0, (int) lowerClassLimits[k][j] - 1);
         }
 
         return new Breaks(this.list, Arrays.asList(kclass));
@@ -148,7 +148,7 @@ public class Jenks {
 
     public static class Breaks {
 
-        private final List<Double> sortedValues;
+        private final List<Number> sortedValues;
 
         private final List<Integer> breaks;
 
@@ -156,7 +156,7 @@ public class Jenks {
          * @param sortedValues the complete array of sorted data values
          * @param breaks       the indexes of the values within the sorted array that begin new classes
          */
-        private Breaks(List<Double> sortedValues, List<Integer> breaks) {
+        private Breaks(List<Number> sortedValues, List<Integer> breaks) {
             this.sortedValues = sortedValues;
             this.breaks = breaks;
         }
@@ -180,22 +180,22 @@ public class Jenks {
             return (sdam - sdcm) / sdam;
         }
 
-        private double sumOfSquareDeviations(List<Double> values) {
+        private double sumOfSquareDeviations(List<Number> values) {
             double mean = mean(values);
             double sum = 0.0;
 
             for (int i = 0; i != values.size(); ++i) {
-                double sqDev = Math.pow(values.get(i) - mean, 2);
+                double sqDev = Math.pow(values.get(i).doubleValue() - mean, 2);
                 sum += sqDev;
             }
 
             return sum;
         }
 
-        private List<Double> classList(int i) {
+        private List<Number> classList(int i) {
             int classStart = (i == 0) ? 0 : this.breaks.get(i - 1) + 1;
             int classEnd = this.breaks.get(i);
-            List<Double> list = new ArrayList<>(classEnd - classStart + 1);
+            List<Number> list = new ArrayList<>(classEnd - classStart + 1);
 
             for (int j = classStart; j <= classEnd; ++j) {
                 list.set(j - classStart, this.sortedValues.get(j));
@@ -211,9 +211,9 @@ public class Jenks {
          */
         public double getClassMin(int classIndex) {
             if (classIndex == 0) {
-                return this.sortedValues.get(0);
+                return this.sortedValues.get(0).doubleValue();
             } else {
-                return this.sortedValues.get(this.breaks.get(classIndex - 1) + 1);
+                return this.sortedValues.get(this.breaks.get(classIndex - 1) + 1).doubleValue();
             }
         }
 
@@ -223,7 +223,7 @@ public class Jenks {
          * @return the maximum value (inclusive) of the given class
          */
         public double getClassMax(int classIndex) {
-            return this.sortedValues.get(this.breaks.get(classIndex));
+            return this.sortedValues.get(this.breaks.get(classIndex)).doubleValue();
         }
 
         public int getClassCount(int classIndex) {
@@ -234,8 +234,8 @@ public class Jenks {
             }
         }
 
-        private double mean(List<Double> values) {
-            return values.stream().mapToDouble(Double::doubleValue).average().orElse(0d);
+        private double mean(List<Number> values) {
+            return values.stream().mapToDouble(Number::doubleValue).average().orElse(0d);
         }
 
         public int numClasses() {

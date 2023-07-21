@@ -16,7 +16,7 @@ public class Commune extends DataNode<CommunePopulation> {
     private Integer areaDepartementRanks;
 
     public Commune(String id, String name, String departement) {
-        super(id, name, Level.COMMUNE, CommunePopulation::new);
+        super(id, name, Level.COMMUNE, new CommunePopulation());
         this.departement = departement;
     }
 

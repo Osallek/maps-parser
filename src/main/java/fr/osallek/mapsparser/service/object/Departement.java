@@ -15,7 +15,7 @@ public class Departement extends DataNode<DepartementPopulation> {
     protected Integer areaRegionRanks;
 
     public Departement(String id, String name, String region, String chefLieu) {
-        super(id, name, Level.DEPARTEMENT, DepartementPopulation::new);
+        super(id, name, Level.DEPARTEMENT, new DepartementPopulation());
         this.region = region;
         this.chefLieu = chefLieu;
     }

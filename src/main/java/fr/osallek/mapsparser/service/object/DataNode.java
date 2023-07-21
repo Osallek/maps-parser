@@ -3,15 +3,11 @@ package fr.osallek.mapsparser.service.object;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.math.BigDecimal;
-import java.util.function.Supplier;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DataNode<P extends DataPopulation> extends IdName<String, String> {
 
     protected final Level level;
-
-    @JsonIgnore
-    protected final Supplier<P> dataPopulationSupplier;
 
     protected BigDecimal area;
 
@@ -19,10 +15,10 @@ public class DataNode<P extends DataPopulation> extends IdName<String, String> {
 
     protected P population;
 
-    public DataNode(String id, String name, Level level, Supplier<P> dataPopulationSupplier) {
+    public DataNode(String id, String name, Level level, P population) {
         super(id, name);
         this.level = level;
-        this.dataPopulationSupplier = dataPopulationSupplier;
+        this.population = population;
     }
 
     public Level getLevel() {
@@ -55,10 +51,6 @@ public class DataNode<P extends DataPopulation> extends IdName<String, String> {
 
     @JsonIgnore
     public void addPopulation(Integer year, Integer population) {
-        if (this.population == null) {
-            this.population = this.dataPopulationSupplier.get();
-        }
-
         if (population != null) {
             this.population.addPopulation(year, population, this.area);
         }
