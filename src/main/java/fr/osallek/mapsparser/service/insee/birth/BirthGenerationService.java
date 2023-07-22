@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
+import java.util.zip.GZIPInputStream;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.annotation.Order;
@@ -38,9 +39,11 @@ public class BirthGenerationService extends GenerationService {
         try {
             //Todo brith/death per capita
             if (MapUtils.isNotEmpty(data.getCommunes().getCommunes())) {
-                try (FileInputStream fileInputStream = new FileInputStream(Constants.SOURCES_FOLDER.resolve("base_naissances_2021.csv").toFile());
-                     InputStreamReader bufferedReader = new InputStreamReader(fileInputStream, StandardCharsets.ISO_8859_1)) {
-                    MappingIterator<BirthHistoryImportLine> it = this.reader.readValues(bufferedReader);
+                try (FileInputStream fileInputStream = new FileInputStream(
+                        Constants.SOURCES_FOLDER.resolve("birth").resolve("base_naissances_2021.csv.gz").toFile());
+                     GZIPInputStream gzipInputStream = new GZIPInputStream(fileInputStream);
+                     InputStreamReader streamReader = new InputStreamReader(gzipInputStream, StandardCharsets.ISO_8859_1);
+                     MappingIterator<BirthHistoryImportLine> it = this.reader.readValues(streamReader)) {
                     while (it.hasNext()) {
                         BirthHistoryImportLine current = it.next();
 

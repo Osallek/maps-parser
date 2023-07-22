@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
+import java.util.zip.GZIPInputStream;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.annotation.Order;
@@ -37,9 +38,11 @@ public class PopulationGenerationService extends GenerationService {
     public void addData(Data data) {
         try {
             if (MapUtils.isNotEmpty(data.getCommunes().getCommunes())) {
-                try (FileInputStream fileInputStream = new FileInputStream(Constants.SOURCES_FOLDER.resolve("populationHistory-1876-2020.csv").toFile());
-                     InputStreamReader bufferedReader = new InputStreamReader(fileInputStream, StandardCharsets.ISO_8859_1)) {
-                    MappingIterator<PopulationHistoryImportLine> it = this.reader.readValues(bufferedReader);
+                try (FileInputStream fileInputStream = new FileInputStream(
+                        Constants.SOURCES_FOLDER.resolve("pop").resolve("populationHistory-1876-2020.csv.gz").toFile());
+                     GZIPInputStream gzipInputStream = new GZIPInputStream(fileInputStream);
+                     InputStreamReader streamReader = new InputStreamReader(gzipInputStream, StandardCharsets.ISO_8859_1);
+                     MappingIterator<PopulationHistoryImportLine> it = this.reader.readValues(streamReader)) {
                     boolean paris = false;
 
                     while (it.hasNext()) {
@@ -126,11 +129,15 @@ public class PopulationGenerationService extends GenerationService {
                                 region.getPopulation().getPopulation().clear();
                             }
 
-                            region.getDepartements().stream().map(s -> data.getDepartements().getDepartements().get(s)).filter(Objects::nonNull).forEach(departement -> {
-                                if (departement.getPopulation() != null && MapUtils.isNotEmpty(departement.getPopulation().getPopulation())) {
-                                    departement.getPopulation().getPopulation().forEach(region::addPopulation);
-                                }
-                            });
+                            region.getDepartements()
+                                  .stream()
+                                  .map(s -> data.getDepartements().getDepartements().get(s))
+                                  .filter(Objects::nonNull)
+                                  .forEach(departement -> {
+                                      if (departement.getPopulation() != null && MapUtils.isNotEmpty(departement.getPopulation().getPopulation())) {
+                                          departement.getPopulation().getPopulation().forEach(region::addPopulation);
+                                      }
+                                  });
                         }
                     }
                 }

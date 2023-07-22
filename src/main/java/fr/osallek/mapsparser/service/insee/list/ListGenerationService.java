@@ -9,14 +9,15 @@ import fr.osallek.mapsparser.service.object.Commune;
 import fr.osallek.mapsparser.service.object.Data;
 import fr.osallek.mapsparser.service.object.Departement;
 import fr.osallek.mapsparser.service.object.Region;
-import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
+import java.util.zip.GZIPInputStream;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.Ordered;
@@ -50,12 +51,12 @@ public class ListGenerationService extends GenerationService {
 
     @Override
     public void addData(Data data) {
-        Path regionsCsv = Constants.SOURCES_FOLDER.resolve("region.csv");
+        Path regionsCsv = Constants.SOURCES_FOLDER.resolve("list").resolve("region.csv.gz");
 
         if (Files.exists(regionsCsv)) {
-            try {
-                MappingIterator<RegionImportLine> it = this.regionsReader.readValues(new InputStreamReader(new FileInputStream(regionsCsv.toFile())));
-
+            try (InputStream fileInputStream = Files.newInputStream(regionsCsv); GZIPInputStream gzipInputStream = new GZIPInputStream(fileInputStream);
+                 InputStreamReader streamReader = new InputStreamReader(gzipInputStream);
+                 MappingIterator<RegionImportLine> it = this.regionsReader.readValues(streamReader)) {
                 if (data.getRegions().getRegions() == null) {
                     data.getRegions().setRegions(new TreeMap<>());
                 }
@@ -85,13 +86,12 @@ public class ListGenerationService extends GenerationService {
             }
         }
 
-        Path departementsCsv = Constants.SOURCES_FOLDER.resolve("departement.csv");
+        Path departementsCsv = Constants.SOURCES_FOLDER.resolve("list").resolve("departement.csv.gz");
 
         if (Files.exists(departementsCsv)) {
-            try {
-                MappingIterator<DepartementImportLine> it = this.departementsReader.readValues(
-                        new InputStreamReader(new FileInputStream(departementsCsv.toFile())));
-
+            try (InputStream fileInputStream = Files.newInputStream(departementsCsv); GZIPInputStream gzipInputStream = new GZIPInputStream(fileInputStream);
+                 InputStreamReader streamReader = new InputStreamReader(gzipInputStream);
+                 MappingIterator<DepartementImportLine> it = this.departementsReader.readValues(streamReader)) {
                 if (data.getDepartements().getDepartements() == null) {
                     data.getDepartements().setDepartements(new TreeMap<>());
                 }
@@ -135,12 +135,12 @@ public class ListGenerationService extends GenerationService {
             }
         }
 
-        Path communesCsv = Constants.SOURCES_FOLDER.resolve("commune.csv");
+        Path communesCsv = Constants.SOURCES_FOLDER.resolve("list").resolve("commune.csv.gz");
 
         if (Files.exists(communesCsv)) {
-            try {
-                MappingIterator<CommuneImportLine> it = this.communesReader.readValues(new InputStreamReader(new FileInputStream(communesCsv.toFile())));
-
+            try (InputStream fileInputStream = Files.newInputStream(communesCsv); GZIPInputStream gzipInputStream = new GZIPInputStream(fileInputStream);
+                 InputStreamReader streamReader = new InputStreamReader(gzipInputStream);
+                 MappingIterator<CommuneImportLine> it = this.communesReader.readValues(streamReader)) {
                 if (data.getCommunes().getCommunes() == null) {
                     data.getCommunes().setCommunes(new TreeMap<>());
                 }

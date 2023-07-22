@@ -9,15 +9,16 @@ import fr.osallek.mapsparser.service.object.Commune;
 import fr.osallek.mapsparser.service.object.Data;
 import fr.osallek.mapsparser.service.object.Departement;
 import fr.osallek.mapsparser.service.object.Region;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.util.zip.GZIPInputStream;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.io.input.BOMInputStream;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
-
-import java.io.FileInputStream;
-import java.io.IOException;
 
 @Service
 @Order(1)
@@ -27,66 +28,64 @@ public class AreaGenerationService extends GenerationService {
 
     public AreaGenerationService(CsvMapper csvMapper, Environment environment) {
         super("L'Observatoire des Territoires", "https://www.observatoire-des-territoires.gouv.fr", environment);
-        this.reader = csvMapper.readerFor(AreaImportLine.class)
-                               .with(csvMapper.schemaFor(AreaImportLine.class).withHeader().withColumnReordering(true));
+        this.reader = csvMapper.readerFor(AreaImportLine.class).with(csvMapper.schemaFor(AreaImportLine.class).withHeader().withColumnReordering(true));
     }
 
     @Override
     public void addData(Data data) {
         try {
             if (MapUtils.isNotEmpty(data.getCommunes().getCommunes())) {
-                MappingIterator<AreaImportLine> it = this.reader.readValues(BOMInputStream.builder()
-                                                                                          .setInputStream(new FileInputStream(
-                                                                                                  Constants.SOURCES_FOLDER.resolve("superficie_communes.csv")
-                                                                                                                          .toFile()))
-                                                                                          .get());
+                try (InputStream fileInputStream = Files.newInputStream(Constants.SOURCES_FOLDER.resolve("area").resolve("superficie_communes.csv.gz"));
+                     GZIPInputStream gzipInputStream = new GZIPInputStream(fileInputStream);
+                     BOMInputStream bomInputStream = BOMInputStream.builder().setInputStream(gzipInputStream).get();
+                     MappingIterator<AreaImportLine> it = this.reader.readValues(bomInputStream)) {
+                    while (it.hasNext()) {
+                        AreaImportLine current = it.next();
 
-                while (it.hasNext()) {
-                    AreaImportLine current = it.next();
+                        if (StringUtils.isNotBlank(current.id())) {
+                            Commune commune = data.getCommunes().getCommunes().get(current.id());
 
-                    if (StringUtils.isNotBlank(current.id())) {
-                        Commune commune = data.getCommunes().getCommunes().get(current.id());
-
-                        if (commune != null && (current.area() != null)) {
-                            commune.setArea(current.area());
+                            if (commune != null && (current.area() != null)) {
+                                commune.setArea(current.area());
+                            }
                         }
                     }
                 }
             }
 
             if (MapUtils.isNotEmpty(data.getDepartements().getDepartements())) {
-                MappingIterator<AreaImportLine> it = this.reader.readValues(BOMInputStream.builder()
-                                                                                          .setInputStream(new FileInputStream(Constants.SOURCES_FOLDER.resolve(
-                                                                                                  "superficie_departements.csv").toFile()))
-                                                                                          .get());
+                try (InputStream fileInputStream = Files.newInputStream(Constants.SOURCES_FOLDER.resolve("area").resolve("superficie_departements.csv.gz"));
+                     GZIPInputStream gzipInputStream = new GZIPInputStream(fileInputStream);
+                     BOMInputStream bomInputStream = BOMInputStream.builder().setInputStream(gzipInputStream).get();
+                     MappingIterator<AreaImportLine> it = this.reader.readValues(bomInputStream)) {
+                    while (it.hasNext()) {
+                        AreaImportLine current = it.next();
 
-                while (it.hasNext()) {
-                    AreaImportLine current = it.next();
+                        if (StringUtils.isNotBlank(current.id())) {
+                            Departement departement = data.getDepartements().getDepartements().get(current.id());
 
-                    if (StringUtils.isNotBlank(current.id())) {
-                        Departement departement = data.getDepartements().getDepartements().get(current.id());
-
-                        if (departement != null && (current.area() != null)) {
-                            departement.setArea(current.area());
+                            if (departement != null && (current.area() != null)) {
+                                departement.setArea(current.area());
+                            }
                         }
                     }
                 }
             }
 
             if (MapUtils.isNotEmpty(data.getRegions().getRegions())) {
-                MappingIterator<AreaImportLine> it = this.reader.readValues(BOMInputStream.builder()
-                                                                                          .setInputStream(new FileInputStream(Constants.SOURCES_FOLDER.resolve(
-                                                                                                  "superficie_regions.csv").toFile()))
-                                                                                          .get());
+                try (InputStream fileInputStream = Files.newInputStream(Constants.SOURCES_FOLDER.resolve("area").resolve("superficie_regions.csv.gz"));
+                     GZIPInputStream gzipInputStream = new GZIPInputStream(fileInputStream);
+                     BOMInputStream bomInputStream = BOMInputStream.builder().setInputStream(gzipInputStream).get();
+                     MappingIterator<AreaImportLine> it = this.reader.readValues(bomInputStream)) {
+                    while (it.hasNext()) {
+                        AreaImportLine current = it.next();
 
-                while (it.hasNext()) {
-                    AreaImportLine current = it.next();
+                        if (StringUtils.isNotBlank(current.id())) {
+                            Region region = data.getRegions().getRegions().get(current.id());
 
-                    if (StringUtils.isNotBlank(current.id())) {
-                        Region region = data.getRegions().getRegions().get(current.id());
-
-                        if (region != null && (current.area() != null)) {
-                            region.setArea(current.area());
+                            if (region != null && (current.area() != null)) {
+                                region.setArea(current.area());
+                            }
                         }
                     }
                 }

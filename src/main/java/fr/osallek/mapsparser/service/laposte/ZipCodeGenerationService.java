@@ -7,17 +7,15 @@ import fr.osallek.mapsparser.common.Constants;
 import fr.osallek.mapsparser.service.GenerationService;
 import fr.osallek.mapsparser.service.object.Commune;
 import fr.osallek.mapsparser.service.object.Data;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.nio.file.Path;
-import java.util.function.Predicate;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.util.zip.GZIPInputStream;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.io.input.BOMInputStream;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.env.Environment;
-import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -25,15 +23,10 @@ import org.springframework.web.reactive.function.client.WebClient;
 @Order(0)
 public class ZipCodeGenerationService extends GenerationService {
 
-    private final Path tmp = Constants.SOURCES_FOLDER.resolve("zipCodes.csv");
-
-    private final WebClient webClient;
-
     private final ObjectReader reader;
 
     public ZipCodeGenerationService(WebClient.Builder builder, CsvMapper csvMapper, Environment environment) {
         super("La Poste", "https://www.lapostegroupe.com", environment);
-        this.webClient = builder.baseUrl("https://datanova.laposte.fr/api/explore/v2.1/catalog/datasets/laposte_hexasmal/exports/csv").build();
         this.reader = csvMapper.readerFor(ZipCodeLine.class)
                                .with(csvMapper.schemaFor(ZipCodeLine.class).withHeader().withColumnReordering(true).withColumnSeparator(';'));
     }
@@ -41,15 +34,10 @@ public class ZipCodeGenerationService extends GenerationService {
     @Override
     public void addData(Data data) {
         if (MapUtils.isNotEmpty(data.getCommunes().getCommunes())) {
-            downloadToFile(() -> this.webClient.get()
-                                               .retrieve()
-                                               .onStatus(Predicate.not(HttpStatusCode::is2xxSuccessful),
-                                                         r -> Constants.handleError(r, getClass().getSimpleName(), this.logger))
-                                               .bodyToFlux(DataBuffer.class), this.tmp).block();
-
-            try {
-                MappingIterator<ZipCodeLine> it = this.reader.readValues(BOMInputStream.builder().setInputStream(new FileInputStream(this.tmp.toFile())).get());
-
+            try (InputStream fileInputStream = Files.newInputStream(Constants.SOURCES_FOLDER.resolve("zipCodes").resolve("zipCodes.csv.gz"));
+                 GZIPInputStream gzipInputStream = new GZIPInputStream(fileInputStream);
+                 BOMInputStream bomInputStream = BOMInputStream.builder().setInputStream(gzipInputStream).get();
+                 MappingIterator<ZipCodeLine> it = this.reader.readValues(bomInputStream)) {
                 while (it.hasNext()) {
                     ZipCodeLine current = it.next();
 

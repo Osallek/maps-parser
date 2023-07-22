@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
+import java.util.zip.GZIPInputStream;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.annotation.Order;
@@ -37,9 +38,11 @@ public class DeathGenerationService extends GenerationService {
     public void addData(Data data) {
         try {
             if (MapUtils.isNotEmpty(data.getCommunes().getCommunes())) {
-                try (FileInputStream fileInputStream = new FileInputStream(Constants.SOURCES_FOLDER.resolve("base_deces_2021.csv").toFile());
-                     InputStreamReader bufferedReader = new InputStreamReader(fileInputStream, StandardCharsets.ISO_8859_1)) {
-                    MappingIterator<DeathHistoryImportLine> it = this.reader.readValues(bufferedReader);
+                try (FileInputStream fileInputStream = new FileInputStream(
+                        Constants.SOURCES_FOLDER.resolve("death").resolve("base_deces_2021.csv.gz").toFile());
+                     GZIPInputStream gzipInputStream = new GZIPInputStream(fileInputStream);
+                     InputStreamReader streamReader = new InputStreamReader(gzipInputStream, StandardCharsets.ISO_8859_1);
+                     MappingIterator<DeathHistoryImportLine> it = this.reader.readValues(streamReader)) {
                     while (it.hasNext()) {
                         DeathHistoryImportLine current = it.next();
 
