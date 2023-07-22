@@ -1,11 +1,8 @@
 package fr.osallek.mapsparser.service;
 
-import com.aayushatharva.brotli4j.Brotli4jLoader;
-import com.aayushatharva.brotli4j.decoder.BrotliInputStream;
-import com.aayushatharva.brotli4j.encoder.BrotliOutputStream;
-import com.aayushatharva.brotli4j.encoder.Encoder;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.osallek.mapsparser.common.Constants;
+import fr.osallek.mapsparser.common.MyGZIPOutputStream;
 import fr.osallek.mapsparser.service.object.Data;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -16,6 +13,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
@@ -45,7 +44,6 @@ public class MapsParserService implements ApplicationListener<ApplicationReadyEv
         this.environment = environment;
         this.generationServices = generationServices;
         this.objectMapper = objectMapper;
-        Brotli4jLoader.ensureAvailability();
     }
 
     @Override
@@ -81,8 +79,15 @@ public class MapsParserService implements ApplicationListener<ApplicationReadyEv
         if (Files.exists(Constants.DATA_PATH)) {
             LOGGER.info("Reading previous data");
             try (InputStream inputStream = Files.newInputStream(Constants.DATA_PATH); BufferedInputStream buffered = new BufferedInputStream(inputStream);
-                 BrotliInputStream brotli = new BrotliInputStream(buffered)) {
-                this.data = this.objectMapper.readValue(brotli, Data.class);
+                 GZIPInputStream gzip = new GZIPInputStream(buffered)) {
+                this.data = this.objectMapper.readValue(gzip, Data.class);
+            }
+            LOGGER.info("Read previous data");
+        } else if (Files.exists(
+                Constants.DATA_PATH.resolveSibling(FilenameUtils.removeExtension(Constants.DATA_FILE.getFileName().getFileName().toString())))) {
+            LOGGER.info("Reading previous data");
+            try (InputStream inputStream = Files.newInputStream(Constants.DATA_PATH); BufferedInputStream buffered = new BufferedInputStream(inputStream)) {
+                this.data = this.objectMapper.readValue(buffered, Data.class);
             }
             LOGGER.info("Read previous data");
         } else {
@@ -96,18 +101,19 @@ public class MapsParserService implements ApplicationListener<ApplicationReadyEv
     private void writeData() throws IOException {
         LOGGER.info("Writing data");
         FileUtils.forceMkdir(Constants.DATA_FOLDER.toFile());
+
         Path tmp = Constants.DATA_FOLDER.resolve(Constants.DATA_FILE.getFileName() + ".tmp");
         try (OutputStream outputStream = Files.newOutputStream(tmp); BufferedOutputStream buffered = new BufferedOutputStream(outputStream);
-             BrotliOutputStream brotli = new BrotliOutputStream(buffered, new Encoder.Parameters().setMode(Encoder.Mode.TEXT).setQuality(11))) {
-            this.objectMapper.writeValue(brotli, this.data);
+             GZIPOutputStream gzip = new MyGZIPOutputStream(buffered)) {
+            this.objectMapper.writeValue(gzip, this.data);
             Files.copy(tmp, Constants.DATA_PATH, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.COPY_ATTRIBUTES);
             FileUtils.deleteQuietly(tmp.toFile());
         }
 
         if (this.environment.matchesProfiles("dev")) {
-            this.objectMapper.writerWithDefaultPrettyPrinter().writeValue(
-                    Constants.DATA_PATH.resolveSibling(FilenameUtils.removeExtension(Constants.DATA_FILE.getFileName().getFileName().toString())).toFile(),
-                    this.data);
+            this.objectMapper.writerWithDefaultPrettyPrinter()
+                             .writeValue(Constants.DATA_PATH.resolveSibling(
+                                     FilenameUtils.removeExtension(Constants.DATA_FILE.getFileName().getFileName().toString())).toFile(), this.data);
         }
 
         LOGGER.info("Written data");

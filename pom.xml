@@ -28,7 +28,6 @@
     <commons-io.version>2.13.0</commons-io.version>
     <commons-lang3.version>3.12.0</commons-lang3.version>
     <progressbar.version>0.9.5</progressbar.version>
-    <brotli4j.version>1.12.0</brotli4j.version>
     <guava.version>32.1.1-jre</guava.version>
   </properties>
 
@@ -87,11 +86,6 @@
       <groupId>me.tongfei</groupId>
       <artifactId>progressbar</artifactId>
       <version>${progressbar.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>com.aayushatharva.brotli4j</groupId>
-      <artifactId>brotli4j</artifactId>
-      <version>${brotli4j.version}</version>
     </dependency>
     <dependency>
       <groupId>com.google.guava</groupId>

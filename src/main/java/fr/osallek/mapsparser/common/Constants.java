@@ -26,7 +26,7 @@ public final class Constants {
 
     public static final Path DATA_FOLDER = Path.of("data");
 
-    public static final Path DATA_FILE = Path.of("data.json.br");
+    public static final Path DATA_FILE = Path.of("data.json.gz");
 
     public static final Path DATA_PATH = DATA_FOLDER.resolve(DATA_FILE);
 
