@@ -12,6 +12,7 @@ import fr.osallek.mapsparser.service.object.DataNodes;
 import fr.osallek.mapsparser.service.object.DataPopulation;
 import fr.osallek.mapsparser.service.object.Departement;
 import fr.osallek.mapsparser.service.object.DepartementPopulation;
+import fr.osallek.mapsparser.service.object.IdName;
 import fr.osallek.mapsparser.service.object.Region;
 import fr.osallek.mapsparser.service.object.mixin.area.AreaCommuneMixin;
 import fr.osallek.mapsparser.service.object.mixin.area.AreaDataJenksMixin;
@@ -33,6 +34,7 @@ import fr.osallek.mapsparser.service.object.mixin.birthpercapita.BirthPerCapitaD
 import fr.osallek.mapsparser.service.object.mixin.common.CommonCommuneMixin;
 import fr.osallek.mapsparser.service.object.mixin.common.CommonDataNodeMixin;
 import fr.osallek.mapsparser.service.object.mixin.common.CommonDepartementMixin;
+import fr.osallek.mapsparser.service.object.mixin.common.CommonIdNameMixin;
 import fr.osallek.mapsparser.service.object.mixin.common.CommonRegionMixin;
 import fr.osallek.mapsparser.service.object.mixin.death.DeathCommunePopulationMixin;
 import fr.osallek.mapsparser.service.object.mixin.death.DeathDataJenksMixin;
@@ -183,6 +185,7 @@ public class MapsParserService implements ApplicationListener<ApplicationReadyEv
         futures.add(CompletableFuture.runAsync(() -> {
             try {
                 Map<Class<?>, Class<?>> commonMixins = new HashMap<>();
+                commonMixins.put(IdName.class, CommonIdNameMixin.class);
                 commonMixins.put(DataNode.class, CommonDataNodeMixin.class);
                 commonMixins.put(Commune.class, CommonCommuneMixin.class);
                 commonMixins.put(Departement.class, CommonDepartementMixin.class);
