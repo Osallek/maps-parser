@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -11,7 +13,7 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class DataPopulation {
+public class DataPopulation extends Hashed {
 
     protected SortedMap<Integer, Integer> population;
 
@@ -331,5 +333,53 @@ public class DataPopulation {
         if (rank != null) {
             this.deathPerCapitaCountryRanks.put(year, rank);
         }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+
+        if (!(o instanceof DataPopulation that)) {
+            return false;
+        }
+
+        return new EqualsBuilder().append(population, that.population)
+                                  .append(density, that.density)
+                                  .append(countryRanks, that.countryRanks)
+                                  .append(densityCountryRanks, that.densityCountryRanks)
+                                  .append(percentCountry, that.percentCountry)
+                                  .append(birth, that.birth)
+                                  .append(death, that.death)
+                                  .append(birthCountryRanks, that.birthCountryRanks)
+                                  .append(deathCountryRanks, that.deathCountryRanks)
+                                  .append(birthPercentCountry, that.birthPercentCountry)
+                                  .append(deathPercentCountry, that.deathPercentCountry)
+                                  .append(birthPerCapita, that.birthPerCapita)
+                                  .append(deathPerCapita, that.deathPerCapita)
+                                  .append(birthPerCapitaCountryRanks, that.birthPerCapitaCountryRanks)
+                                  .append(deathPerCapitaCountryRanks, that.deathPerCapitaCountryRanks)
+                                  .isEquals();
+    }
+
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder(17, 37).append(population)
+                                          .append(density)
+                                          .append(countryRanks)
+                                          .append(densityCountryRanks)
+                                          .append(percentCountry)
+                                          .append(birth)
+                                          .append(death)
+                                          .append(birthCountryRanks)
+                                          .append(deathCountryRanks)
+                                          .append(birthPercentCountry)
+                                          .append(deathPercentCountry)
+                                          .append(birthPerCapita)
+                                          .append(deathPerCapita)
+                                          .append(birthPerCapitaCountryRanks)
+                                          .append(deathPerCapitaCountryRanks)
+                                          .toHashCode();
     }
 }

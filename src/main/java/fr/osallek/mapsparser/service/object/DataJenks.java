@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import fr.osallek.mapsparser.common.Constants;
 import fr.osallek.mapsparser.common.Jenks;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,7 +23,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class DataJenks {
+public class DataJenks extends Hashed {
 
     private static final int NB_CLASSES = 17;
 
@@ -165,5 +167,38 @@ public class DataJenks {
 
     public void setDeathPerCapita(SortedMap<Integer, SortedSet<Double>> deathPerCapita) {
         this.deathPerCapita = deathPerCapita;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+
+        if (!(o instanceof DataJenks dataJenks)) {
+            return false;
+        }
+
+        return new EqualsBuilder().append(population, dataJenks.population)
+                                  .append(area, dataJenks.area)
+                                  .append(density, dataJenks.density)
+                                  .append(birth, dataJenks.birth)
+                                  .append(death, dataJenks.death)
+                                  .append(birthPerCapita, dataJenks.birthPerCapita)
+                                  .append(deathPerCapita, dataJenks.deathPerCapita)
+                                  .isEquals();
+    }
+
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder(17, 37)
+                                          .append(population)
+                                          .append(area)
+                                          .append(density)
+                                          .append(birth)
+                                          .append(death)
+                                          .append(birthPerCapita)
+                                          .append(deathPerCapita)
+                                          .toHashCode();
     }
 }

@@ -2,6 +2,8 @@ package fr.osallek.mapsparser.service.object;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -197,5 +199,43 @@ public class CommunePopulation extends DepartementPopulation {
         if (rank != null) {
             this.deathPerCapitaDepartementRanks.put(year, rank);
         }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+
+        if (!(o instanceof CommunePopulation that)) {
+            return false;
+        }
+
+        return new EqualsBuilder().appendSuper(super.equals(o))
+                                  .append(departementRanks, that.departementRanks)
+                                  .append(densityDepartementRanks, that.densityDepartementRanks)
+                                  .append(percentDepartement, that.percentDepartement)
+                                  .append(birthDepartementRanks, that.birthDepartementRanks)
+                                  .append(deathDepartementRanks, that.deathDepartementRanks)
+                                  .append(birthPercentDepartement, that.birthPercentDepartement)
+                                  .append(deathPercentDepartement, that.deathPercentDepartement)
+                                  .append(birthPerCapitaDepartementRanks, that.birthPerCapitaDepartementRanks)
+                                  .append(deathPerCapitaDepartementRanks, that.deathPerCapitaDepartementRanks)
+                                  .isEquals();
+    }
+
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder(17, 37).appendSuper(super.hashCode())
+                                          .append(departementRanks)
+                                          .append(densityDepartementRanks)
+                                          .append(percentDepartement)
+                                          .append(birthDepartementRanks)
+                                          .append(deathDepartementRanks)
+                                          .append(birthPercentDepartement)
+                                          .append(deathPercentDepartement)
+                                          .append(birthPerCapitaDepartementRanks)
+                                          .append(deathPerCapitaDepartementRanks)
+                                          .toHashCode();
     }
 }

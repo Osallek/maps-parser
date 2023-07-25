@@ -2,6 +2,8 @@ package fr.osallek.mapsparser.service.object;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -196,5 +198,43 @@ public class DepartementPopulation extends DataPopulation {
         if (rank != null) {
             this.deathPerCapitaRegionRanks.put(year, rank);
         }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+
+        if (!(o instanceof DepartementPopulation that)) {
+            return false;
+        }
+
+        return new EqualsBuilder().appendSuper(super.equals(o))
+                                  .append(regionRanks, that.regionRanks)
+                                  .append(densityRegionRanks, that.densityRegionRanks)
+                                  .append(percentRegion, that.percentRegion)
+                                  .append(birthRegionRanks, that.birthRegionRanks)
+                                  .append(deathRegionRanks, that.deathRegionRanks)
+                                  .append(birthPercentRegion, that.birthPercentRegion)
+                                  .append(deathPercentRegion, that.deathPercentRegion)
+                                  .append(birthPerCapitaRegionRanks, that.birthPerCapitaRegionRanks)
+                                  .append(deathPerCapitaRegionRanks, that.deathPerCapitaRegionRanks)
+                                  .isEquals();
+    }
+
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder(17, 37).appendSuper(super.hashCode())
+                                          .append(regionRanks)
+                                          .append(densityRegionRanks)
+                                          .append(percentRegion)
+                                          .append(birthRegionRanks)
+                                          .append(deathRegionRanks)
+                                          .append(birthPercentRegion)
+                                          .append(deathPercentRegion)
+                                          .append(birthPerCapitaRegionRanks)
+                                          .append(deathPerCapitaRegionRanks)
+                                          .toHashCode();
     }
 }

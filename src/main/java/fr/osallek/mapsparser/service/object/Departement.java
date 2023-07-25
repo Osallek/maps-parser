@@ -1,8 +1,10 @@
 package fr.osallek.mapsparser.service.object;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 
-import java.util.Collection;
+import java.util.SortedSet;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Departement extends DataNode<DepartementPopulation> {
@@ -11,7 +13,7 @@ public class Departement extends DataNode<DepartementPopulation> {
 
     private String region;
 
-    private Collection<String> communes;
+    private SortedSet<String> communes;
 
     protected Integer areaRegionRanks;
 
@@ -37,11 +39,11 @@ public class Departement extends DataNode<DepartementPopulation> {
         this.region = region;
     }
 
-    public Collection<String> getCommunes() {
+    public SortedSet<String> getCommunes() {
         return communes;
     }
 
-    public void setCommunes(Collection<String> communes) {
+    public void setCommunes(SortedSet<String> communes) {
         this.communes = communes;
     }
 
@@ -51,5 +53,28 @@ public class Departement extends DataNode<DepartementPopulation> {
 
     public void setAreaRegionRanks(Integer areaRegionRanks) {
         this.areaRegionRanks = areaRegionRanks;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+
+        if (!(o instanceof Departement that)) {
+            return false;
+        }
+
+        return new EqualsBuilder().appendSuper(super.equals(o))
+                                  .append(chefLieu, that.chefLieu)
+                                  .append(region, that.region)
+                                  .append(communes, that.communes)
+                                  .append(areaRegionRanks, that.areaRegionRanks)
+                                  .isEquals();
+    }
+
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder(17, 37).appendSuper(super.hashCode()).append(chefLieu).append(region).append(communes).append(areaRegionRanks).toHashCode();
     }
 }

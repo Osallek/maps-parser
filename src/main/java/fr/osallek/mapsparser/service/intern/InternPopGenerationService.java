@@ -45,13 +45,15 @@ public class InternPopGenerationService extends GenerationService {
 
     @Override
     public void addData(Data data) {
-        doRanksPop(data, DataPopulation::getPopulation, DataJenks::getPopulation, DataJenks::doPopulation, DataPopulation::setCountryRanks, DataPopulation::setPercentCountry, DepartementPopulation::setRegionRanks, DepartementPopulation::setPercentRegion, CommunePopulation::setDepartementRanks, CommunePopulation::setPercentDepartement);
-        doRanksPop(data, DataPopulation::getBirth, DataJenks::getBirth, DataJenks::doBirth, DataPopulation::setBirthCountryRanks, DataPopulation::setBirthPercentCountry, DepartementPopulation::setBirthRegionRanks, DepartementPopulation::setBirthPercentRegion, CommunePopulation::setBirthDepartementRanks, CommunePopulation::setBirthPercentDepartement);
-        doRanksPop(data, DataPopulation::getDeath, DataJenks::getDeath, DataJenks::doDeath, DataPopulation::setDeathCountryRanks, DataPopulation::setDeathPercentCountry, DepartementPopulation::setDeathRegionRanks, DepartementPopulation::setDeathPercentRegion, CommunePopulation::setDeathDepartementRanks, CommunePopulation::setDeathPercentDepartement);
-        doDensity(data, DataPopulation::getDensity, DataJenks::getDensity, DataJenks::doDensity, DataPopulation::setDensityCountryRanks, DepartementPopulation::setDensityRegionRanks, CommunePopulation::setDensityDepartementRanks);
-        doArea(data);
-        doDensity(data, DataPopulation::getBirthPerCapita, DataJenks::getBirthPerCapita, DataJenks::doBirthPerCapita, DataPopulation::setBirthPerCapitaCountryRanks, DepartementPopulation::setBirthPerCapitaRegionRanks, CommunePopulation::setBirthPerCapitaDepartementRanks);
-        doDensity(data, DataPopulation::getDeathPerCapita, DataJenks::getDeathPerCapita, DataJenks::doDeathPerCapita, DataPopulation::setDeathPerCapitaCountryRanks, DepartementPopulation::setDeathPerCapitaRegionRanks, CommunePopulation::setDeathPerCapitaDepartementRanks);
+        if (data.getCommunes().getCommunes().values().stream().anyMatch(c -> c.getInitHash() != c.hashCode())) {
+            doRanksPop(data, DataPopulation::getPopulation, DataJenks::getPopulation, DataJenks::doPopulation, DataPopulation::setCountryRanks, DataPopulation::setPercentCountry, DepartementPopulation::setRegionRanks, DepartementPopulation::setPercentRegion, CommunePopulation::setDepartementRanks, CommunePopulation::setPercentDepartement);
+            doRanksPop(data, DataPopulation::getBirth, DataJenks::getBirth, DataJenks::doBirth, DataPopulation::setBirthCountryRanks, DataPopulation::setBirthPercentCountry, DepartementPopulation::setBirthRegionRanks, DepartementPopulation::setBirthPercentRegion, CommunePopulation::setBirthDepartementRanks, CommunePopulation::setBirthPercentDepartement);
+            doRanksPop(data, DataPopulation::getDeath, DataJenks::getDeath, DataJenks::doDeath, DataPopulation::setDeathCountryRanks, DataPopulation::setDeathPercentCountry, DepartementPopulation::setDeathRegionRanks, DepartementPopulation::setDeathPercentRegion, CommunePopulation::setDeathDepartementRanks, CommunePopulation::setDeathPercentDepartement);
+            doDensity(data, DataPopulation::getBirthPerCapita, DataJenks::getBirthPerCapita, DataJenks::doBirthPerCapita, DataPopulation::setBirthPerCapitaCountryRanks, DepartementPopulation::setBirthPerCapitaRegionRanks, CommunePopulation::setBirthPerCapitaDepartementRanks);
+            doDensity(data, DataPopulation::getDeathPerCapita, DataJenks::getDeathPerCapita, DataJenks::doDeathPerCapita, DataPopulation::setDeathPerCapitaCountryRanks, DepartementPopulation::setDeathPerCapitaRegionRanks, CommunePopulation::setDeathPerCapitaDepartementRanks);
+            doDensity(data, DataPopulation::getDensity, DataJenks::getDensity, DataJenks::doDensity, DataPopulation::setDensityCountryRanks, DepartementPopulation::setDensityRegionRanks, CommunePopulation::setDensityDepartementRanks);
+            doArea(data);
+        }
     }
 
     private void doArea(Data data) {
