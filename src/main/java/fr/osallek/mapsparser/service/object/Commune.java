@@ -9,8 +9,6 @@ public class Commune extends DataNode<CommunePopulation> {
 
     private String zipCode;
 
-    private Point point;
-
     private Integer areaRegionRanks;
 
     private Integer areaDepartementRanks;
@@ -34,14 +32,6 @@ public class Commune extends DataNode<CommunePopulation> {
 
     public void setZipCode(String zipCode) {
         this.zipCode = zipCode;
-    }
-
-    public Point getPoint() {
-        return point;
-    }
-
-    public void setPoint(Point point) {
-        this.point = point;
     }
 
     public Integer getAreaRegionRanks() {

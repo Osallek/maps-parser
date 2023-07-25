@@ -2,12 +2,13 @@ package fr.osallek.mapsparser.service.object;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.ObjectUtils;
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.SortedMap;
 import java.util.TreeMap;
-import org.apache.commons.collections4.MapUtils;
-import org.apache.commons.lang3.ObjectUtils;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DataPopulation {

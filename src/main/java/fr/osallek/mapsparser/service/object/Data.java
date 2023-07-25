@@ -1,16 +1,18 @@
 package fr.osallek.mapsparser.service.object;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
-import java.util.SortedMap;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Data {
 
+    @JsonProperty("communes")
     private Communes communes;
 
+    @JsonProperty("departements")
     private Departements departements;
 
+    @JsonProperty("regions")
     private Regions regions;
 
     public Communes getCommunes() {

@@ -2,6 +2,7 @@ package fr.osallek.mapsparser.service.object;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import java.util.SortedMap;
 import java.util.TreeMap;
 

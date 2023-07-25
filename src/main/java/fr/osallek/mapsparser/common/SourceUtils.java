@@ -2,6 +2,7 @@ package fr.osallek.mapsparser.common;
 
 import com.fasterxml.jackson.databind.MappingIterator;
 import com.fasterxml.jackson.databind.ObjectReader;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;

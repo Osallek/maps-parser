@@ -1,8 +1,5 @@
 package fr.osallek.mapsparser.common;
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ForkJoinPool;
 import org.slf4j.Logger;
 import org.springframework.web.reactive.function.client.ClientRequest;
 import org.springframework.web.reactive.function.client.ClientResponse;
@@ -13,6 +10,8 @@ import java.nio.file.Path;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ForkJoinPool;
 
 public final class Constants {
 
@@ -28,7 +27,11 @@ public final class Constants {
 
     public static final Path DATA_FILE = Path.of("data.json.gz");
 
+    public static final Path COMMON_FILE = Path.of("common.json.gz");
+
     public static final Path DATA_PATH = DATA_FOLDER.resolve(DATA_FILE);
+
+    public static final Path COMMON_PATH = DATA_FOLDER.resolve(COMMON_FILE);
 
     public static final Path SOURCES_FOLDER = Path.of("sources");
 
