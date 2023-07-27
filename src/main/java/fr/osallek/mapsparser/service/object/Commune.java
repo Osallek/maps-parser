@@ -7,6 +7,8 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Commune extends DataNode<CommunePopulation> {
 
+    private Point point;
+
     private String departement;
 
     private String zipCode;
@@ -18,6 +20,14 @@ public class Commune extends DataNode<CommunePopulation> {
     public Commune(String id, String name, String departement) {
         super(id, name, Level.COMMUNE, new CommunePopulation());
         this.departement = departement;
+    }
+
+    public Point getPoint() {
+        return point;
+    }
+
+    public void setPoint(Point point) {
+        this.point = point;
     }
 
     public String getDepartement() {
@@ -67,6 +77,7 @@ public class Commune extends DataNode<CommunePopulation> {
                                   .append(zipCode, commune.zipCode)
                                   .append(areaRegionRanks, commune.areaRegionRanks)
                                   .append(areaDepartementRanks, commune.areaDepartementRanks)
+                                  .append(point, commune.point)
                                   .isEquals();
     }
 
@@ -77,6 +88,7 @@ public class Commune extends DataNode<CommunePopulation> {
                                           .append(zipCode)
                                           .append(areaRegionRanks)
                                           .append(areaDepartementRanks)
+                                          .append(point)
                                           .toHashCode();
     }
 }

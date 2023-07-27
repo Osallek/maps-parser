@@ -172,13 +172,15 @@ public class MapsParserService implements ApplicationListener<ApplicationReadyEv
 
         FileUtils.forceMkdir(Constants.DATA_FOLDER.toFile());
 
-/*        Path tmp = Constants.DATA_FOLDER.resolve(Constants.DATA_FILE.getFileName() + ".tmp");
-        try (OutputStream outputStream = Files.newOutputStream(tmp); BufferedOutputStream buffered = new BufferedOutputStream(
-                outputStream); GZIPOutputStream gzip = new MyGZIPOutputStream(buffered)) {
-            this.objectMapper.writeValue(gzip, this.data);
-            Files.copy(tmp, Constants.DATA_PATH, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.COPY_ATTRIBUTES);
-            FileUtils.deleteQuietly(tmp.toFile());
-        }*/
+        if (this.data.getInitHash() != this.data.hashCode()) {
+            Path tmp = Constants.DATA_FOLDER.resolve(Constants.DATA_FILE.getFileName() + ".tmp");
+            try (OutputStream outputStream = Files.newOutputStream(tmp); BufferedOutputStream buffered = new BufferedOutputStream(outputStream);
+                 GZIPOutputStream gzip = new MyGZIPOutputStream(buffered)) {
+                this.objectMapper.writeValue(gzip, this.data);
+                Files.copy(tmp, Constants.DATA_PATH, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.COPY_ATTRIBUTES);
+                FileUtils.deleteQuietly(tmp.toFile());
+            }
+        }
 
         List<CompletableFuture<?>> futures = new ArrayList<>();
 
