@@ -230,14 +230,16 @@ public class DataPopulation extends Hashed {
         if (birth != null) {
             this.birth.compute(year, (y, old) -> ObjectUtils.defaultIfNull(old, 0) + ObjectUtils.defaultIfNull(birth, 0));
 
-            if (birth == 0) {
-                this.birthPerCapita.put(year, BigDecimal.ZERO);
-            } else if (MapUtils.isNotEmpty(this.population) && this.population.containsKey(year)) {
-                if (this.population.get(year) == 0) {
+            if (MapUtils.isNotEmpty(this.population) && this.population.containsKey(year)) {
+                if (birth == 0) {
                     this.birthPerCapita.put(year, BigDecimal.ZERO);
                 } else {
-                    this.birthPerCapita.put(year, BigDecimal.valueOf(this.birth.get(year)).multiply(BigDecimal.valueOf(1000))
-                                                            .divide(BigDecimal.valueOf(this.population.get(year)), 1, RoundingMode.FLOOR));
+                    if (this.population.get(year) == 0) {
+                        this.birthPerCapita.put(year, BigDecimal.ZERO);
+                    } else {
+                        this.birthPerCapita.put(year, BigDecimal.valueOf(this.birth.get(year)).multiply(BigDecimal.valueOf(1000))
+                                                                .divide(BigDecimal.valueOf(this.population.get(year)), 1, RoundingMode.FLOOR));
+                    }
                 }
             }
         }
@@ -289,14 +291,16 @@ public class DataPopulation extends Hashed {
         if (death != null) {
             this.death.compute(year, (y, old) -> ObjectUtils.defaultIfNull(old, 0) + ObjectUtils.defaultIfNull(death, 0));
 
-            if (death == 0) {
-                this.deathPerCapita.put(year, BigDecimal.ZERO);
-            } else if (MapUtils.isNotEmpty(this.population) && this.population.containsKey(year)) {
-                if (this.population.get(year) == 0) {
+            if (MapUtils.isNotEmpty(this.population) && this.population.containsKey(year)) {
+                if (death == 0) {
                     this.deathPerCapita.put(year, BigDecimal.ZERO);
                 } else {
-                    this.deathPerCapita.put(year, BigDecimal.valueOf(this.death.get(year)).multiply(BigDecimal.valueOf(1000))
-                                                            .divide(BigDecimal.valueOf(this.population.get(year)), 1, RoundingMode.FLOOR));
+                    if (this.population.get(year) == 0) {
+                        this.deathPerCapita.put(year, BigDecimal.ZERO);
+                    } else {
+                        this.deathPerCapita.put(year, BigDecimal.valueOf(this.death.get(year)).multiply(BigDecimal.valueOf(1000))
+                                                                .divide(BigDecimal.valueOf(this.population.get(year)), 1, RoundingMode.FLOOR));
+                    }
                 }
             }
         }
