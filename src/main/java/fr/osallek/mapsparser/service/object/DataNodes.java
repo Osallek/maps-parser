@@ -9,32 +9,12 @@ public abstract class DataNodes extends Hashed {
 
     protected final Level level;
 
-    protected DataJenks jenks;
-
-    public DataNodes(Level level) {
+    protected DataNodes(Level level) {
         this.level = level;
     }
 
     public Level getLevel() {
         return level;
-    }
-
-    public DataJenks getJenks() {
-        if (this.jenks == null) {
-            this.jenks = new DataJenks();
-        }
-
-        return jenks;
-    }
-
-    public void setJenks(DataJenks jenks) {
-        this.jenks = jenks;
-    }
-
-    @Override
-    public void initHash() {
-        this.jenks.initHash();
-        super.initHash();
     }
 
     @Override
@@ -47,11 +27,11 @@ public abstract class DataNodes extends Hashed {
             return false;
         }
 
-        return new EqualsBuilder().append(level, dataNodes.level).append(jenks, dataNodes.jenks).isEquals();
+        return new EqualsBuilder().append(level, dataNodes.level).isEquals();
     }
 
     @Override
     public int hashCode() {
-        return new HashCodeBuilder(17, 37).append(level).append(jenks).toHashCode();
+        return new HashCodeBuilder(17, 37).append(level).toHashCode();
     }
 }

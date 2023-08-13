@@ -17,6 +17,9 @@ public class Data extends Hashed {
     @JsonProperty("regions")
     private Regions regions;
 
+    @JsonProperty("jenks")
+    private DataJenks jenks;
+
     public Communes getCommunes() {
         if (this.communes == null) {
             this.communes = new Communes();
@@ -53,6 +56,18 @@ public class Data extends Hashed {
         this.regions = regions;
     }
 
+    public DataJenks getJenks() {
+        if (this.jenks == null) {
+            this.jenks = new DataJenks();
+        }
+
+        return jenks;
+    }
+
+    public void setJenks(DataJenks jenks) {
+        this.jenks = jenks;
+    }
+
     @Override
     public void initHash() {
         this.communes.initHash();
@@ -74,11 +89,12 @@ public class Data extends Hashed {
         return new EqualsBuilder().append(communes, data.communes)
                                   .append(departements, data.departements)
                                   .append(regions, data.regions)
+                                  .append(jenks, data.jenks)
                                   .isEquals();
     }
 
     @Override
     public int hashCode() {
-        return new HashCodeBuilder(17, 37).append(communes).append(departements).append(regions).toHashCode();
+        return new HashCodeBuilder(17, 37).append(communes).append(departements).append(regions).append(jenks).toHashCode();
     }
 }

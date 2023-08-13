@@ -5,13 +5,10 @@ import fr.osallek.mapsparser.service.GenerationService;
 import fr.osallek.mapsparser.service.object.Commune;
 import fr.osallek.mapsparser.service.object.CommunePopulation;
 import fr.osallek.mapsparser.service.object.Data;
-import fr.osallek.mapsparser.service.object.DataJenks;
-import fr.osallek.mapsparser.service.object.DataNode;
 import fr.osallek.mapsparser.service.object.DataPopulation;
 import fr.osallek.mapsparser.service.object.Departement;
 import fr.osallek.mapsparser.service.object.DepartementPopulation;
 import fr.osallek.mapsparser.service.object.Region;
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.logging.log4j.util.TriConsumer;
 import org.springframework.core.Ordered;
@@ -29,9 +26,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.SortedMap;
-import java.util.SortedSet;
 import java.util.TreeMap;
-import java.util.function.BiConsumer;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -46,129 +42,56 @@ public class InternPopGenerationService extends GenerationService {
     @Override
     public void addData(Data data) {
         if (data.getCommunes().getCommunes().values().stream().anyMatch(c -> c.getInitHash() != c.hashCode())) {
-            doRanksPop(data, DataPopulation::getPopulation, DataJenks::getPopulation, DataJenks::doPopulation, DataPopulation::setCountryRanks, DataPopulation::setPercentCountry, DepartementPopulation::setRegionRanks, DepartementPopulation::setPercentRegion, CommunePopulation::setDepartementRanks, CommunePopulation::setPercentDepartement);
-            doRanksPop(data, DataPopulation::getBirth, DataJenks::getBirth, DataJenks::doBirth, DataPopulation::setBirthCountryRanks, DataPopulation::setBirthPercentCountry, DepartementPopulation::setBirthRegionRanks, DepartementPopulation::setBirthPercentRegion, CommunePopulation::setBirthDepartementRanks, CommunePopulation::setBirthPercentDepartement);
-            doRanksPop(data, DataPopulation::getDeath, DataJenks::getDeath, DataJenks::doDeath, DataPopulation::setDeathCountryRanks, DataPopulation::setDeathPercentCountry, DepartementPopulation::setDeathRegionRanks, DepartementPopulation::setDeathPercentRegion, CommunePopulation::setDeathDepartementRanks, CommunePopulation::setDeathPercentDepartement);
-            doDensity(data, DataPopulation::getBirthPerCapita, DataJenks::getBirthPerCapita, DataJenks::doBirthPerCapita, DataPopulation::setBirthPerCapitaCountryRanks, DepartementPopulation::setBirthPerCapitaRegionRanks, CommunePopulation::setBirthPerCapitaDepartementRanks);
-            doDensity(data, DataPopulation::getDeathPerCapita, DataJenks::getDeathPerCapita, DataJenks::doDeathPerCapita, DataPopulation::setDeathPerCapitaCountryRanks, DepartementPopulation::setDeathPerCapitaRegionRanks, CommunePopulation::setDeathPerCapitaDepartementRanks);
-            doDensity(data, DataPopulation::getDensity, DataJenks::getDensity, DataJenks::doDensity, DataPopulation::setDensityCountryRanks, DepartementPopulation::setDensityRegionRanks, CommunePopulation::setDensityDepartementRanks);
-            doArea(data);
-        }
-    }
-
-    private void doArea(Data data) {
-        if (MapUtils.isNotEmpty(data.getCommunes().getCommunes())) {
-            if (!this.environment.matchesProfiles("dev") || CollectionUtils.isEmpty(data.getCommunes().getJenks().getArea())) {
-                data.getCommunes()
-                    .getJenks()
-                    .doArea(data.getCommunes()
-                                .getCommunes()
-                                .values()
-                                .stream()
-                                .map(Commune::getArea)
-                                .filter(Objects::nonNull)
-                                .map(BigDecimal::doubleValue)
-                                .toList());
-            }
-
-            List<BigDecimal> areas = data.getCommunes().getCommunes().values().stream().map(DataNode::getArea).filter(Objects::nonNull).sorted().toList();
-            Map<String, List<BigDecimal>> departementsArea = data.getCommunes()
-                                                                 .getCommunes()
-                                                                 .values()
-                                                                 .stream()
-                                                                 .filter(c -> c.getArea() != null)
-                                                                 .collect(Collectors.groupingBy(Commune::getDepartement, Collectors.mapping(DataNode::getArea, Collectors.toList())));
-            Map<String, List<BigDecimal>> regionsArea = data.getCommunes()
-                                                            .getCommunes()
-                                                            .values()
-                                                            .stream()
-                                                            .filter(c -> c.getArea() != null)
-                                                            .filter(c -> data.getDepartements().getDepartements().containsKey(c.getDepartement()))
-                                                            .collect(Collectors.groupingBy(c -> data.getDepartements()
-                                                                                                    .getDepartements()
-                                                                                                    .get(c.getDepartement())
-                                                                                                    .getRegion(), Collectors.mapping(DataNode::getArea, Collectors.toList())));
-            departementsArea.values().forEach(Collections::sort);
-            regionsArea.values().forEach(Collections::sort);
-
-            data.getCommunes().getCommunes().values().parallelStream().filter(commune -> commune.getArea() != null).forEach(commune -> {
-                commune.setAreaCountryRanks(areas.size() - CollecUtils.rank(areas, commune.getArea()));
-
-                Departement departement = data.getDepartements().getDepartements().get(commune.getDepartement());
-
-                if (departement != null) {
-                    commune.setAreaDepartementRanks(
-                            departementsArea.get(departement.getId()).size() - CollecUtils.rank(departementsArea.get(departement.getId()), commune.getArea()));
-                    commune.setAreaRegionRanks(
-                            regionsArea.get(departement.getRegion()).size() - CollecUtils.rank(regionsArea.get(departement.getRegion()), commune.getArea()));
-                }
-            });
+            doRanksPop(data, DataPopulation::getPopulation, DataPopulation::setCountryRanks, DataPopulation::setPercentCountry,
+                       DepartementPopulation::setRegionRanks, DepartementPopulation::setPercentRegion, CommunePopulation::setDepartementRanks,
+                       CommunePopulation::setPercentDepartement);
+            doRanksPop(data, DataPopulation::getBirth, DataPopulation::setBirthCountryRanks, DataPopulation::setBirthPercentCountry,
+                       DepartementPopulation::setBirthRegionRanks, DepartementPopulation::setBirthPercentRegion, CommunePopulation::setBirthDepartementRanks,
+                       CommunePopulation::setBirthPercentDepartement);
+            doRanksPop(data, DataPopulation::getDeath, DataPopulation::setDeathCountryRanks, DataPopulation::setDeathPercentCountry,
+                       DepartementPopulation::setDeathRegionRanks, DepartementPopulation::setDeathPercentRegion, CommunePopulation::setDeathDepartementRanks,
+                       CommunePopulation::setDeathPercentDepartement);
+            doDensity(data, DataPopulation::getBirthPerCapita, DataPopulation::setBirthPerCapitaCountryRanks,
+                      DepartementPopulation::setBirthPerCapitaRegionRanks, CommunePopulation::setBirthPerCapitaDepartementRanks);
+            doDensity(data, DataPopulation::getDeathPerCapita, DataPopulation::setDeathPerCapitaCountryRanks,
+                      DepartementPopulation::setDeathPerCapitaRegionRanks, CommunePopulation::setDeathPerCapitaDepartementRanks);
+            doDensity(data, DataPopulation::getDensity, DataPopulation::setDensityCountryRanks, DepartementPopulation::setDensityRegionRanks,
+                      CommunePopulation::setDensityDepartementRanks);
         }
 
-        if (MapUtils.isNotEmpty(data.getDepartements().getDepartements())) {
-            if (!this.environment.matchesProfiles("dev") || CollectionUtils.isEmpty(data.getDepartements().getJenks().getArea())) {
-                data.getDepartements()
-                    .getJenks()
-                    .doArea(data.getDepartements()
-                                .getDepartements()
-                                .values()
-                                .stream()
-                                .map(DataNode::getArea)
-                                .filter(Objects::nonNull)
-                                .map(BigDecimal::doubleValue)
-                                .toList());
-            }
-
-            List<BigDecimal> areas = data.getDepartements()
-                                         .getDepartements()
-                                         .values()
-                                         .stream()
-                                         .map(DataNode::getArea)
-                                         .filter(Objects::nonNull)
-                                         .sorted()
-                                         .toList();
-            Map<String, List<BigDecimal>> regionsArea = data.getDepartements()
-                                                            .getDepartements()
-                                                            .values()
-                                                            .stream()
-                                                            .filter(c -> c.getArea() != null)
-                                                            .collect(Collectors.groupingBy(Departement::getRegion, Collectors.mapping(DataNode::getArea, Collectors.toList())));
-            regionsArea.values().forEach(Collections::sort);
-
-            data.getDepartements().getDepartements().values().parallelStream().filter(departement -> departement.getArea() != null).forEach(departement -> {
-                departement.setAreaCountryRanks(areas.size() - CollecUtils.rank(areas, departement.getArea()));
-                departement.setAreaRegionRanks(
-                        regionsArea.get(departement.getRegion()).size() - CollecUtils.rank(regionsArea.get(departement.getRegion()), departement.getArea()));
-            });
+        List<CompletableFuture<Void>> futures = new ArrayList<>();
+        if (!this.environment.matchesProfiles("dev") || MapUtils.isEmpty(data.getJenks().getPopulation())) {
+            futures.add(data.getJenks().doPopulation(data).thenAccept(unused -> logger.info("Done Population Jenks")));
         }
 
-        if (MapUtils.isNotEmpty(data.getRegions().getRegions())) {
-            if (!this.environment.matchesProfiles("dev") || CollectionUtils.isEmpty(data.getRegions().getJenks().getArea())) {
-                data.getRegions()
-                    .getJenks()
-                    .doArea(data.getRegions()
-                                .getRegions()
-                                .values()
-                                .stream()
-                                .map(DataNode::getArea)
-                                .filter(Objects::nonNull)
-                                .map(BigDecimal::doubleValue)
-                                .toList());
-            }
-
-            List<BigDecimal> areas = data.getRegions().getRegions().values().stream().map(DataNode::getArea).filter(Objects::nonNull).sorted().toList();
-            data.getRegions()
-                .getRegions()
-                .values()
-                .parallelStream()
-                .filter(region -> region.getArea() != null)
-                .forEach(region -> region.setAreaCountryRanks(areas.size() - CollecUtils.rank(areas, region.getArea())));
+        if (!this.environment.matchesProfiles("dev") || data.getJenks().getArea() == null) {
+            futures.add(data.getJenks().doArea(data).thenAccept(unused -> logger.info("Done Area Jenks")));
         }
+
+        if (!this.environment.matchesProfiles("dev") || MapUtils.isEmpty(data.getJenks().getDensity())) {
+            futures.add(data.getJenks().doDensity(data).thenAccept(unused -> logger.info("Done Density Jenks")));
+        }
+
+        if (!this.environment.matchesProfiles("dev") || MapUtils.isEmpty(data.getJenks().getBirth())) {
+            futures.add(data.getJenks().doBirth(data).thenAccept(unused -> logger.info("Done Birth Jenks")));
+        }
+
+        if (!this.environment.matchesProfiles("dev") || MapUtils.isEmpty(data.getJenks().getDeath())) {
+            futures.add(data.getJenks().doDeath(data).thenAccept(unused -> logger.info("Done Death Jenks")));
+        }
+
+        if (!this.environment.matchesProfiles("dev") || MapUtils.isEmpty(data.getJenks().getBirthPerCapita())) {
+            futures.add(data.getJenks().doBirthPerCapita(data).thenAccept(unused -> logger.info("Done Birth Per Capita Jenks")));
+        }
+
+        if (!this.environment.matchesProfiles("dev") || MapUtils.isEmpty(data.getJenks().getDeathPerCapita())) {
+            futures.add(data.getJenks().doDeathPerCapita(data).thenAccept(unused -> logger.info("Done Death Per Capita Jenks")));
+        }
+        CompletableFuture.allOf(futures.toArray(CompletableFuture[]::new)).join();
     }
 
     private void doRanksPop(Data data, Function<DataPopulation, SortedMap<Integer, Integer>> mapper,
-                            Function<DataJenks, SortedMap<Integer, SortedSet<Double>>> jenksMapper,
-                            BiConsumer<DataJenks, Map<Integer, List<Double>>> jenksConsumer, TriConsumer<DataPopulation, Integer, Integer> countryRankConsumer,
+                            TriConsumer<DataPopulation, Integer, Integer> countryRankConsumer,
                             TriConsumer<DataPopulation, Integer, Double> countryPercentConsumer,
                             TriConsumer<DepartementPopulation, Integer, Integer> regionRankConsumer,
                             TriConsumer<DepartementPopulation, Integer, Double> regionPercentConsumer,
@@ -203,10 +126,6 @@ public class InternPopGenerationService extends GenerationService {
 
             datas.values().forEach(Collections::sort);
 
-            if (!this.environment.matchesProfiles("dev") || MapUtils.isEmpty(jenksMapper.apply(data.getCommunes().getJenks()))) {
-                jenksConsumer.accept(data.getCommunes().getJenks(), datas);
-            }
-
             Map<String, SortedMap<Integer, List<Double>>> departementsDatas = new HashMap<>();
             Map<String, SortedMap<Integer, List<Double>>> regionsDatas = new HashMap<>();
             data.getCommunes()
@@ -237,16 +156,12 @@ public class InternPopGenerationService extends GenerationService {
             datas.forEach((year, p) -> totalData.put(year, BigDecimal.valueOf(p.stream().mapToInt(Double::intValue).sum())));
             departementsDatas.forEach((dep, map) -> totalDepartementsData.put(dep, map.entrySet()
                                                                                       .stream()
-                                                                                      .collect(Collectors.toMap(Map.Entry::getKey, e -> BigDecimal.valueOf(e.getValue()
-                                                                                                                                                            .stream()
-                                                                                                                                                            .mapToInt(Double::intValue)
-                                                                                                                                                            .sum())))));
+                                                                                      .collect(Collectors.toMap(Map.Entry::getKey, e -> BigDecimal.valueOf(
+                                                                                              e.getValue().stream().mapToInt(Double::intValue).sum())))));
             regionsDatas.forEach((dep, map) -> totalRegionsData.put(dep, map.entrySet()
                                                                             .stream()
-                                                                            .collect(Collectors.toMap(Map.Entry::getKey, e -> BigDecimal.valueOf(e.getValue()
-                                                                                                                                                  .stream()
-                                                                                                                                                  .mapToInt(Double::intValue)
-                                                                                                                                                  .sum())))));
+                                                                            .collect(Collectors.toMap(Map.Entry::getKey, e -> BigDecimal.valueOf(
+                                                                                    e.getValue().stream().mapToInt(Double::intValue).sum())))));
 
             data.getCommunes()
                 .getCommunes()
@@ -266,21 +181,21 @@ public class InternPopGenerationService extends GenerationService {
                     Departement departement = data.getDepartements().getDepartements().get(commune.getDepartement());
 
                     if (departement != null) {
-                        departementRankConsumer.accept(commune.getPopulation(), year, departementsDatas.get(commune.getDepartement()).get(year).size()
-                                                                                      - CollecUtils.rank(departementsDatas.get(commune.getDepartement())
-                                                                                                                          .get(year), pop.doubleValue()));
+                        departementRankConsumer.accept(commune.getPopulation(), year,
+                                                       departementsDatas.get(commune.getDepartement()).get(year).size() - CollecUtils.rank(
+                                                               departementsDatas.get(commune.getDepartement()).get(year), pop.doubleValue()));
 
                         if (totalDepartementsData.containsKey(departement.getId()) && totalDepartementsData.get(departement.getId()).containsKey(year)) {
                             departementPercentConsumer.accept(commune.getPopulation(), year, BigDecimal.valueOf(pop)
                                                                                                        .multiply(BigDecimal.valueOf(100))
                                                                                                        .divide(totalDepartementsData.get(departement.getId())
-                                                                                                                                    .get(year), 3, RoundingMode.HALF_UP)
+                                                                                                                                    .get(year), 3,
+                                                                                                               RoundingMode.HALF_UP)
                                                                                                        .doubleValue());
                         }
 
-                        regionRankConsumer.accept(commune.getPopulation(), year, regionsDatas.get(departement.getRegion()).get(year).size()
-                                                                                 - CollecUtils.rank(regionsDatas.get(departement.getRegion())
-                                                                                                                .get(year), pop.doubleValue()));
+                        regionRankConsumer.accept(commune.getPopulation(), year, regionsDatas.get(departement.getRegion()).get(year).size() - CollecUtils.rank(
+                                regionsDatas.get(departement.getRegion()).get(year), pop.doubleValue()));
 
                         if (totalRegionsData.containsKey(departement.getRegion()) && totalRegionsData.get(departement.getRegion()).containsKey(year)) {
                             regionPercentConsumer.accept(commune.getPopulation(), year, BigDecimal.valueOf(pop)
@@ -318,10 +233,6 @@ public class InternPopGenerationService extends GenerationService {
 
             datas.values().forEach(Collections::sort);
 
-            if (!this.environment.matchesProfiles("dev") || MapUtils.isEmpty(jenksMapper.apply(data.getDepartements().getJenks()))) {
-                jenksConsumer.accept(data.getDepartements().getJenks(), datas);
-            }
-
             Map<String, SortedMap<Integer, List<Double>>> regionsPops = new HashMap<>();
             data.getDepartements()
                 .getDepartements()
@@ -356,9 +267,8 @@ public class InternPopGenerationService extends GenerationService {
                                                                                                    .doubleValue());
                     }
 
-                    regionRankConsumer.accept(departement.getPopulation(), year, regionsPops.get(departement.getRegion()).get(year).size()
-                                                                                 - CollecUtils.rank(regionsPops.get(departement.getRegion())
-                                                                                                               .get(year), pop.doubleValue()));
+                    regionRankConsumer.accept(departement.getPopulation(), year, regionsPops.get(departement.getRegion()).get(year).size() - CollecUtils.rank(
+                            regionsPops.get(departement.getRegion()).get(year), pop.doubleValue()));
 
                     if (totalRegionsData.containsKey(departement.getRegion()) && totalRegionsData.get(departement.getRegion()).containsKey(year)) {
                         regionPercentConsumer.accept(departement.getPopulation(), year, BigDecimal.valueOf(pop)
@@ -395,10 +305,6 @@ public class InternPopGenerationService extends GenerationService {
 
             datas.values().forEach(Collections::sort);
 
-            if (!this.environment.matchesProfiles("dev") || MapUtils.isEmpty(jenksMapper.apply(data.getRegions().getJenks()))) {
-                jenksConsumer.accept(data.getRegions().getJenks(), datas);
-            }
-
             data.getRegions()
                 .getRegions()
                 .values()
@@ -418,8 +324,6 @@ public class InternPopGenerationService extends GenerationService {
     }
 
     private <N extends Number & Comparable<N>> void doDensity(Data data, Function<DataPopulation, SortedMap<Integer, N>> mapper,
-                                                              Function<DataJenks, SortedMap<Integer, SortedSet<Double>>> jenksMapper,
-                                                              BiConsumer<DataJenks, Map<Integer, List<N>>> jenksConsumer,
                                                               TriConsumer<DataPopulation, Integer, Integer> countryRankConsumer,
                                                               TriConsumer<DepartementPopulation, Integer, Integer> regionRankConsumer,
                                                               TriConsumer<CommunePopulation, Integer, Integer> departementRankConsumer) {
@@ -447,10 +351,6 @@ public class InternPopGenerationService extends GenerationService {
                 }));
 
             datas.values().forEach(Collections::sort);
-
-            if (!this.environment.matchesProfiles("dev") || MapUtils.isEmpty(jenksMapper.apply(data.getRegions().getJenks()))) {
-                jenksConsumer.accept(data.getRegions().getJenks(), datas);
-            }
 
             data.getRegions()
                 .getRegions()
@@ -505,10 +405,6 @@ public class InternPopGenerationService extends GenerationService {
             datas.values().forEach(Collections::sort);
             regionDatas.values().stream().map(Map::values).flatMap(Collection::stream).forEach(Collections::sort);
 
-            if (!this.environment.matchesProfiles("dev") || MapUtils.isEmpty(jenksMapper.apply(data.getDepartements().getJenks()))) {
-                jenksConsumer.accept(data.getDepartements().getJenks(), datas);
-            }
-
             data.getDepartements()
                 .getDepartements()
                 .values()
@@ -520,8 +416,8 @@ public class InternPopGenerationService extends GenerationService {
                     }
 
                     countryRankConsumer.accept(departement.getPopulation(), year, datas.get(year).size() - CollecUtils.rank(datas.get(year), value));
-                    regionRankConsumer.accept(departement.getPopulation(), year, regionDatas.get(departement.getRegion()).get(year).size()
-                                                                                 - CollecUtils.rank(regionDatas.get(departement.getRegion()).get(year), value));
+                    regionRankConsumer.accept(departement.getPopulation(), year, regionDatas.get(departement.getRegion()).get(year).size() - CollecUtils.rank(
+                            regionDatas.get(departement.getRegion()).get(year), value));
                 }));
         }
 
@@ -581,10 +477,6 @@ public class InternPopGenerationService extends GenerationService {
             departementDatas.values().stream().map(Map::values).flatMap(Collection::stream).forEach(Collections::sort);
             regionDatas.values().stream().map(Map::values).flatMap(Collection::stream).forEach(Collections::sort);
 
-            if (!this.environment.matchesProfiles("dev") || MapUtils.isEmpty(jenksMapper.apply(data.getCommunes().getJenks()))) {
-                jenksConsumer.accept(data.getCommunes().getJenks(), datas);
-            }
-
             data.getCommunes()
                 .getCommunes()
                 .values()
@@ -596,15 +488,15 @@ public class InternPopGenerationService extends GenerationService {
                     }
 
                     countryRankConsumer.accept(commune.getPopulation(), year, datas.get(year).size() - CollecUtils.rank(datas.get(year), value));
-                    departementRankConsumer.accept(commune.getPopulation(), year, departementDatas.get(commune.getDepartement()).get(year).size()
-                                                                                  - CollecUtils.rank(departementDatas.get(commune.getDepartement())
-                                                                                                                     .get(year), value));
+                    departementRankConsumer.accept(commune.getPopulation(), year,
+                                                   departementDatas.get(commune.getDepartement()).get(year).size() - CollecUtils.rank(
+                                                           departementDatas.get(commune.getDepartement()).get(year), value));
 
                     Departement departement = data.getDepartements().getDepartements().get(commune.getDepartement());
 
                     if (departement != null) {
-                        regionRankConsumer.accept(commune.getPopulation(), year, regionDatas.get(departement.getRegion()).get(year).size()
-                                                                                 - CollecUtils.rank(regionDatas.get(departement.getRegion()).get(year), value));
+                        regionRankConsumer.accept(commune.getPopulation(), year, regionDatas.get(departement.getRegion()).get(year).size() - CollecUtils.rank(
+                                regionDatas.get(departement.getRegion()).get(year), value));
                     }
                 }));
         }

@@ -82,7 +82,7 @@ public class Jenks {
      * @return int[] breaks (upper indices of class)
      */
     public Breaks computeBreaks(int nbClasses) {
-        if (this.list.size() == 0) {
+        if (this.list.isEmpty()) {
             return new Breaks(List.of(0d), List.of(0));
         }
 
@@ -273,6 +273,10 @@ public class Jenks {
                 // sb.append("\n");
             }
             return sb.toString();
+        }
+
+        public int classOf(Number value) {
+            return classOf(value.doubleValue());
         }
 
         public int classOf(double value) {

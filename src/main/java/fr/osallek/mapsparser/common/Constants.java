@@ -1,5 +1,8 @@
 package fr.osallek.mapsparser.common;
 
+import jnr.ffi.LibraryLoader;
+import jnr.ffi.LibraryOption;
+import jnr.ffi.Platform;
 import org.slf4j.Logger;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.web.reactive.function.client.ClientRequest;
@@ -11,6 +14,8 @@ import java.nio.file.Path;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.Map;
 
 public final class Constants {
 
@@ -28,6 +33,14 @@ public final class Constants {
 
     public static final Path DATA_PATH = DATA_FOLDER.resolve(DATA_FILE);
 
+    public static final Path REGIONS_FOLDER = DATA_FOLDER.resolve("regions");
+
+    public static final Path DEPARTEMENTS_FOLDER = DATA_FOLDER.resolve("departements");
+
+    public static final Path COMMUNES_FOLDER = DATA_FOLDER.resolve("communes");
+
+    public static final Path JENKS_FOLDER = DATA_FOLDER.resolve("jenks");
+
     public static final Path COMMON_FILE = Path.of("common.json.gz");
 
     public static final Path COMMON_PATH = DATA_FOLDER.resolve(COMMON_FILE);
@@ -39,6 +52,10 @@ public final class Constants {
     public static final Path POP_FILE = Path.of("pop.json.gz");
 
     public static final Path POP_PATH = DATA_FOLDER.resolve(POP_FILE);
+
+    public static final Path POP_ALL_FILE = Path.of("pop-all.json.gz");
+
+    public static final Path POP_ALL_PATH = DATA_FOLDER.resolve(POP_ALL_FILE);
 
     public static final Path DENSITY_FILE = Path.of("density.json.gz");
 
@@ -72,7 +89,6 @@ public final class Constants {
         executor.setKeepAliveSeconds(0);
         executor.setQueueCapacity(Integer.MAX_VALUE);
         executor.initialize();
-
         EXECUTOR = executor;
     }
 

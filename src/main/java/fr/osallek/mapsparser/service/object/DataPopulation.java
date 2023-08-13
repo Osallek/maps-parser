@@ -17,6 +17,8 @@ public class DataPopulation extends Hashed {
 
     protected SortedMap<Integer, Integer> population;
 
+    protected SortedMap<Integer, TreeMap<Integer, TreeMap<Integer, Integer>>> allPop; //<Year, <Sexe, <Age, Pop>>>
+
     protected SortedMap<Integer, BigDecimal> density;
 
     protected SortedMap<Integer, Integer> countryRanks;
@@ -51,6 +53,14 @@ public class DataPopulation extends Hashed {
 
     public void setPopulation(SortedMap<Integer, Integer> population) {
         this.population = population;
+    }
+
+    public SortedMap<Integer, TreeMap<Integer, TreeMap<Integer, Integer>>> getAllPop() {
+        return allPop;
+    }
+
+    public void setAllPop(SortedMap<Integer, TreeMap<Integer, TreeMap<Integer, Integer>>> allPop) {
+        this.allPop = allPop;
     }
 
     public SortedMap<Integer, Integer> getCountryRanks() {
@@ -181,6 +191,44 @@ public class DataPopulation extends Hashed {
             if (area != null) {
                 this.density.put(year, BigDecimal.valueOf(this.population.get(year)).divide(area, 1, RoundingMode.FLOOR));
             }
+        }
+    }
+
+    @JsonIgnore
+    public void addAllPopulation(Integer year, Integer sexe, Integer age, Integer population) {
+        if (this.allPop == null) {
+            this.allPop = new TreeMap<>();
+        }
+
+        if (year != null && sexe != null && age != null && population != null) {
+            this.allPop.compute(year, (keyYear, yearMap) -> {
+                if (yearMap == null) {
+                    yearMap = new TreeMap<>();
+                }
+
+                yearMap.compute(sexe, (keySexe, sexeMap) -> {
+                    if (sexeMap == null) {
+                        sexeMap = new TreeMap<>();
+                    }
+
+                    sexeMap.compute(age, (ageKey, oldPop) -> ObjectUtils.defaultIfNull(oldPop, 0) + ObjectUtils.defaultIfNull(population, 0));
+
+                    return sexeMap;
+                });
+
+                return yearMap;
+            });
+        }
+    }
+
+    @JsonIgnore
+    public void addAllPopulation(Integer year, TreeMap<Integer, TreeMap<Integer, Integer>> map) {
+        if (this.allPop == null) {
+            this.allPop = new TreeMap<>();
+        }
+
+        if (year != null && MapUtils.isNotEmpty(map)) {
+            this.allPop.put(year, map);
         }
     }
 

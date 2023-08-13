@@ -57,34 +57,6 @@ public class JacksonConfig {
     }
 
     @Bean
-    public ObjectMapper emptyObjectMapper() {
-        SimpleModule simpleModule = new SimpleModule();
-        simpleModule.addSerializer(new LocalDateTimeSerializer(Constants.DATE_TIME_FORMATTER));
-        simpleModule.addDeserializer(LocalDateTime.class, new LocalDateTimeDeserializer(Constants.DATE_TIME_FORMATTER));
-        simpleModule.addSerializer(new LocalDateSerializer(DateTimeFormatter.ISO_DATE));
-        simpleModule.addDeserializer(LocalDate.class, new LocalDateDeserializer(DateTimeFormatter.ISO_DATE));
-        simpleModule.addKeyDeserializer(LocalDate.class, LocalDateKeyDeserializer.INSTANCE);
-        simpleModule.addKeyDeserializer(LocalDateTime.class, LocalDateTimeKeyDeserializer.INSTANCE);
-
-        return JsonMapper.builder()
-                         .findAndAddModules()
-                         .addModule(simpleModule)
-                         .enable(JsonWriteFeature.QUOTE_FIELD_NAMES)
-                         .enable(JsonParser.Feature.ALLOW_COMMENTS)
-                         .enable(MapperFeature.ACCEPT_CASE_INSENSITIVE_ENUMS)
-                         .enable(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES)
-                         .enable(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY)
-                         .enable(JsonGenerator.Feature.WRITE_BIGDECIMAL_AS_PLAIN)
-                         .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
-                         .disable(MapperFeature.AUTO_DETECT_CREATORS)
-                         .disable(MapperFeature.AUTO_DETECT_FIELDS)
-                         .disable(MapperFeature.AUTO_DETECT_GETTERS)
-                         .disable(MapperFeature.AUTO_DETECT_IS_GETTERS)
-                         .build()
-                         .setDefaultPropertyInclusion(JsonInclude.Include.NON_EMPTY);
-    }
-
-    @Bean
     public CsvMapper csvMapper() {
         return CsvMapper.builder()
                         .findAndAddModules()

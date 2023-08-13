@@ -9,163 +9,284 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.math.BigDecimal;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.SortedMap;
-import java.util.SortedSet;
 import java.util.TreeMap;
-import java.util.TreeSet;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CountDownLatch;
-import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DataJenks extends Hashed {
 
+    @JsonIgnore
     private static final int NB_CLASSES = 17;
 
+    @JsonIgnore
     protected final Logger logger = LoggerFactory.getLogger(getClass());
 
-    protected SortedMap<Integer, SortedSet<Double>> population;
+    protected SortedMap<Integer, DataJenksNode> population;
 
-    protected SortedSet<Double> area;
+    protected DataJenksNode area;
 
-    protected SortedMap<Integer, SortedSet<Double>> density;
+    protected SortedMap<Integer, DataJenksNode> density;
 
-    protected SortedMap<Integer, SortedSet<Double>> birth;
+    protected SortedMap<Integer, DataJenksNode> birth;
 
-    protected SortedMap<Integer, SortedSet<Double>> death;
+    protected SortedMap<Integer, DataJenksNode> death;
 
-    protected SortedMap<Integer, SortedSet<Double>> birthPerCapita;
+    protected SortedMap<Integer, DataJenksNode> birthPerCapita;
 
-    protected SortedMap<Integer, SortedSet<Double>> deathPerCapita;
+    protected SortedMap<Integer, DataJenksNode> deathPerCapita;
 
     @JsonIgnore
-    public void doPopulation(Map<Integer, List<Double>> data) {
-        doYears(data, map -> this.population = map);
+    public CompletableFuture<Void> doArea(Data data) {
+        return doNode(data, DataNode::getArea, DataNode::getArea, DataNode::getArea).thenAccept(dataJenksNode -> this.area = dataJenksNode);
     }
 
     @JsonIgnore
-    public void doArea(List<Double> areas) {
-        int nbClasses = Math.min(NB_CLASSES, areas.size());
-        Jenks jenks = new Jenks(areas);
-        Jenks.Breaks breaks = jenks.computeBreaks(nbClasses);
+    public CompletableFuture<Void> doPopulation(Data data) {
+        Map<Integer, DataJenksNode> tmp = new ConcurrentHashMap<>();
 
-        this.area = IntStream.range(0, nbClasses - 1).mapToObj(breaks::getClassMax).collect(Collectors.toCollection(TreeSet::new));
+        return CompletableFuture.allOf(data.getRegions()
+                                           .getRegions()
+                                           .values()
+                                           .stream()
+                                           .map(DataNode::getPopulation)
+                                           .map(DataPopulation::getPopulation)
+                                           .map(SortedMap::keySet)
+                                           .flatMap(Collection::stream)
+                                           .distinct()
+                                           .map(year -> doNode(data, d -> Optional.ofNullable(d.getPopulation().getPopulation())
+                                                                                  .map(map -> map.get(year))
+                                                                                  .orElse(null), d -> Optional.ofNullable(d.getPopulation().getPopulation())
+                                                                                                              .map(map -> map.get(year))
+                                                                                                              .orElse(null),
+                                                               d -> Optional.ofNullable(d.getPopulation().getPopulation())
+                                                                            .map(map -> map.get(year))
+                                                                            .orElse(null)).thenAccept(dataJenksNode -> tmp.put(year, dataJenksNode)))
+                                           .toArray(CompletableFuture[]::new)).thenAccept(unused -> this.population = new TreeMap<>(tmp));
     }
 
     @JsonIgnore
-    public void doDensity(Map<Integer, List<BigDecimal>> data) {
-        doYears(data, map -> this.density = map);
+    public CompletableFuture<Void> doDensity(Data data) {
+        Map<Integer, DataJenksNode> tmp = new ConcurrentHashMap<>();
+
+        return CompletableFuture.allOf(data.getRegions()
+                                           .getRegions()
+                                           .values()
+                                           .stream()
+                                           .map(DataNode::getPopulation)
+                                           .map(DataPopulation::getDensity)
+                                           .map(SortedMap::keySet)
+                                           .flatMap(Collection::stream)
+                                           .distinct()
+                                           .map(year -> doNode(data,
+                                                               d -> Optional.ofNullable(d.getPopulation().getDensity()).map(map -> map.get(year)).orElse(null),
+                                                               d -> Optional.ofNullable(d.getPopulation().getDensity()).map(map -> map.get(year)).orElse(null),
+                                                               d -> Optional.ofNullable(d.getPopulation().getDensity())
+                                                                            .map(map -> map.get(year))
+                                                                            .orElse(null)).thenAccept(dataJenksNode -> tmp.put(year, dataJenksNode)))
+                                           .toArray(CompletableFuture[]::new)).thenAccept(unused -> this.density = new TreeMap<>(tmp));
     }
 
     @JsonIgnore
-    public void doBirth(Map<Integer, List<Double>> data) {
-        doYears(data, map -> this.birth = map);
+    public CompletableFuture<Void> doBirth(Data data) {
+        Map<Integer, DataJenksNode> tmp = new ConcurrentHashMap<>();
+
+        return CompletableFuture.allOf(data.getRegions()
+                                           .getRegions()
+                                           .values()
+                                           .stream()
+                                           .map(DataNode::getPopulation)
+                                           .map(DataPopulation::getBirth)
+                                           .map(SortedMap::keySet)
+                                           .flatMap(Collection::stream)
+                                           .distinct()
+                                           .map(year -> doNode(data,
+                                                               d -> Optional.ofNullable(d.getPopulation().getBirth()).map(map -> map.get(year)).orElse(null),
+                                                               d -> Optional.ofNullable(d.getPopulation().getBirth()).map(map -> map.get(year)).orElse(null),
+                                                               d -> Optional.ofNullable(d.getPopulation().getBirth())
+                                                                            .map(map -> map.get(year))
+                                                                            .orElse(null)).thenAccept(dataJenksNode -> tmp.put(year, dataJenksNode)))
+                                           .toArray(CompletableFuture[]::new)).thenAccept(unused -> this.birth = new TreeMap<>(tmp));
     }
 
     @JsonIgnore
-    public void doDeath(Map<Integer, List<Double>> data) {
-        doYears(data, map -> this.death = map);
+    public CompletableFuture<Void> doDeath(Data data) {
+        Map<Integer, DataJenksNode> tmp = new ConcurrentHashMap<>();
+
+        return CompletableFuture.allOf(data.getRegions()
+                                           .getRegions()
+                                           .values()
+                                           .stream()
+                                           .map(DataNode::getPopulation)
+                                           .map(DataPopulation::getDeath)
+                                           .map(SortedMap::keySet)
+                                           .flatMap(Collection::stream)
+                                           .distinct()
+                                           .map(year -> doNode(data,
+                                                               d -> Optional.ofNullable(d.getPopulation().getDeath()).map(map -> map.get(year)).orElse(null),
+                                                               d -> Optional.ofNullable(d.getPopulation().getDeath()).map(map -> map.get(year)).orElse(null),
+                                                               d -> Optional.ofNullable(d.getPopulation().getDeath())
+                                                                            .map(map -> map.get(year))
+                                                                            .orElse(null)).thenAccept(dataJenksNode -> tmp.put(year, dataJenksNode)))
+                                           .toArray(CompletableFuture[]::new)).thenAccept(unused -> this.death = new TreeMap<>(tmp));
     }
 
     @JsonIgnore
-    public void doBirthPerCapita(Map<Integer, List<BigDecimal>> data) {
-        doYears(data, map -> this.birthPerCapita = map);
+    public CompletableFuture<Void> doBirthPerCapita(Data data) {
+        Map<Integer, DataJenksNode> tmp = new ConcurrentHashMap<>();
+
+        return CompletableFuture.allOf(data.getRegions()
+                                           .getRegions()
+                                           .values()
+                                           .stream()
+                                           .map(DataNode::getPopulation)
+                                           .map(DataPopulation::getBirthPerCapita)
+                                           .map(SortedMap::keySet)
+                                           .flatMap(Collection::stream)
+                                           .distinct()
+                                           .map(year -> doNode(data, d -> Optional.ofNullable(d.getPopulation().getBirthPerCapita())
+                                                                                  .map(map -> map.get(year))
+                                                                                  .orElse(null), d -> Optional.ofNullable(d.getPopulation().getBirthPerCapita())
+                                                                                                              .map(map -> map.get(year))
+                                                                                                              .orElse(null),
+                                                               d -> Optional.ofNullable(d.getPopulation().getBirthPerCapita())
+                                                                            .map(map -> map.get(year))
+                                                                            .orElse(null)).thenAccept(dataJenksNode -> tmp.put(year, dataJenksNode)))
+                                           .toArray(CompletableFuture[]::new)).thenAccept(unused -> this.birthPerCapita = new TreeMap<>(tmp));
     }
 
     @JsonIgnore
-    public void doDeathPerCapita(Map<Integer, List<BigDecimal>> data) {
-        doYears(data, map -> this.deathPerCapita = map);
+    public CompletableFuture<Void> doDeathPerCapita(Data data) {
+        Map<Integer, DataJenksNode> tmp = new ConcurrentHashMap<>();
+
+        return CompletableFuture.allOf(data.getRegions()
+                                           .getRegions()
+                                           .values()
+                                           .stream()
+                                           .map(DataNode::getPopulation)
+                                           .map(DataPopulation::getDeathPerCapita)
+                                           .map(SortedMap::keySet)
+                                           .flatMap(Collection::stream)
+                                           .distinct()
+                                           .map(year -> doNode(data, d -> Optional.ofNullable(d.getPopulation().getDeathPerCapita())
+                                                                                  .map(map -> map.get(year))
+                                                                                  .orElse(null), d -> Optional.ofNullable(d.getPopulation().getDeathPerCapita())
+                                                                                                              .map(map -> map.get(year))
+                                                                                                              .orElse(null),
+                                                               d -> Optional.ofNullable(d.getPopulation().getDeathPerCapita())
+                                                                            .map(map -> map.get(year))
+                                                                            .orElse(null)).thenAccept(dataJenksNode -> tmp.put(year, dataJenksNode)))
+                                           .toArray(CompletableFuture[]::new)).thenAccept(unused -> this.deathPerCapita = new TreeMap<>(tmp));
     }
 
     @JsonIgnore
-    private <N extends Number> void doYears(Map<Integer, List<N>> data, Consumer<SortedMap<Integer, SortedSet<Double>>> consumer) {
-        CountDownLatch countDownLatch = new CountDownLatch(data.size());
-        int nbClasses = Math.min(NB_CLASSES, data.values().iterator().next().size());
-        Map<Integer, SortedSet<Double>> map = new ConcurrentHashMap<>();
+    private CompletableFuture<DataJenksNode> doNode(Data data, Function<Region, Number> regionMapper, Function<Departement, Number> departementMapper,
+                                                    Function<Commune, Number> communeMapper) {
+        CompletableFuture<DataJenksNode> future = new CompletableFuture<>();
+        CompletableFuture.runAsync(() -> {
+            List<Number> numbers = data.getRegions().getRegions().values().stream().map(regionMapper).filter(Objects::nonNull).toList();
+            int nbRegionsClasses = Math.min(NB_CLASSES, numbers.size());
+            Jenks jenksRegions = new Jenks(numbers);
+            Jenks.Breaks breaksRegions = jenksRegions.computeBreaks(nbRegionsClasses);
 
-        data.forEach((key, value) -> {
-            Jenks jenks = new Jenks(value);
+            numbers = data.getDepartements().getDepartements().values().stream().map(departementMapper).filter(Objects::nonNull).toList();
+            int nbDepartementsClasses = Math.min(NB_CLASSES, numbers.size());
+            Jenks jenksDepartements = new Jenks(numbers);
+            Jenks.Breaks breaksDepartements = jenksDepartements.computeBreaks(nbDepartementsClasses);
 
-            Constants.EXECUTOR.submit(() -> {
-                try {
-                    Jenks.Breaks breaks = jenks.computeBreaks(nbClasses);
+            numbers = data.getCommunes().getCommunes().values().stream().map(communeMapper).filter(Objects::nonNull).toList();
+            int nbCommunesClasses = Math.min(NB_CLASSES, numbers.size());
+            Jenks jenksCommunes = new Jenks(numbers);
+            Jenks.Breaks breaksCommunes = jenksCommunes.computeBreaks(nbCommunesClasses);
 
-                    map.put(key, IntStream.range(0, nbClasses - 1).mapToObj(breaks::getClassMax).collect(Collectors.toCollection(TreeSet::new)));
-                } catch (Exception e) {
-                    this.logger.error(e.getMessage(), e);
-                } finally {
-                    countDownLatch.countDown();
-                }
-            });
-        });
+            future.complete(new DataJenksNode(data.getRegions()
+                                                  .getRegions()
+                                                  .values()
+                                                  .stream()
+                                                  .filter(r -> regionMapper.apply(r) != null)
+                                                  .collect(Collectors.toMap(Region::getId, r -> breaksRegions.classOf(regionMapper.apply(r)), (a, b) -> a,
+                                                                            TreeMap::new)), data.getDepartements()
+                                                                                                .getDepartements()
+                                                                                                .values()
+                                                                                                .stream()
+                                                                                                .filter(r -> departementMapper.apply(r) != null)
+                                                                                                .collect(Collectors.toMap(Departement::getId,
+                                                                                                                          r -> breaksDepartements.classOf(
+                                                                                                                                  departementMapper.apply(r)),
+                                                                                                                          (a, b) -> a, TreeMap::new)),
+                                              data.getCommunes()
+                                                  .getCommunes()
+                                                  .values()
+                                                  .stream()
+                                                  .filter(r -> communeMapper.apply(r) != null)
+                                                  .collect(Collectors.toMap(Commune::getId, r -> breaksCommunes.classOf(communeMapper.apply(r)), (a, b) -> a,
+                                                                            TreeMap::new))));
+        }, Constants.EXECUTOR);
 
-        try {
-            countDownLatch.await();
-        } catch (InterruptedException e) {
-            this.logger.error("An error occurred while waiting for jenks: {}", e.getMessage(), e);
-        }
-
-        consumer.accept(map.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (o, o2) -> o, TreeMap::new)));
+        return future;
     }
 
-    public SortedMap<Integer, SortedSet<Double>> getPopulation() {
+    public SortedMap<Integer, DataJenksNode> getPopulation() {
         return population;
     }
 
-    public void setPopulation(SortedMap<Integer, SortedSet<Double>> population) {
+    public void setPopulation(SortedMap<Integer, DataJenksNode> population) {
         this.population = population;
     }
 
-    public SortedSet<Double> getArea() {
+    public DataJenksNode getArea() {
         return area;
     }
 
-    public void setArea(SortedSet<Double> area) {
+    public void setArea(DataJenksNode area) {
         this.area = area;
     }
 
-    public SortedMap<Integer, SortedSet<Double>> getDensity() {
+    public SortedMap<Integer, DataJenksNode> getDensity() {
         return density;
     }
 
-    public void setDensity(SortedMap<Integer, SortedSet<Double>> density) {
+    public void setDensity(SortedMap<Integer, DataJenksNode> density) {
         this.density = density;
     }
 
-    public SortedMap<Integer, SortedSet<Double>> getBirth() {
+    public SortedMap<Integer, DataJenksNode> getBirth() {
         return birth;
     }
 
-    public void setBirth(SortedMap<Integer, SortedSet<Double>> birth) {
+    public void setBirth(SortedMap<Integer, DataJenksNode> birth) {
         this.birth = birth;
     }
 
-    public SortedMap<Integer, SortedSet<Double>> getDeath() {
+    public SortedMap<Integer, DataJenksNode> getDeath() {
         return death;
     }
 
-    public void setDeath(SortedMap<Integer, SortedSet<Double>> death) {
+    public void setDeath(SortedMap<Integer, DataJenksNode> death) {
         this.death = death;
     }
 
-    public SortedMap<Integer, SortedSet<Double>> getBirthPerCapita() {
+    public SortedMap<Integer, DataJenksNode> getBirthPerCapita() {
         return birthPerCapita;
     }
 
-    public void setBirthPerCapita(SortedMap<Integer, SortedSet<Double>> birthPerCapita) {
+    public void setBirthPerCapita(SortedMap<Integer, DataJenksNode> birthPerCapita) {
         this.birthPerCapita = birthPerCapita;
     }
 
-    public SortedMap<Integer, SortedSet<Double>> getDeathPerCapita() {
+    public SortedMap<Integer, DataJenksNode> getDeathPerCapita() {
         return deathPerCapita;
     }
 
-    public void setDeathPerCapita(SortedMap<Integer, SortedSet<Double>> deathPerCapita) {
+    public void setDeathPerCapita(SortedMap<Integer, DataJenksNode> deathPerCapita) {
         this.deathPerCapita = deathPerCapita;
     }
 
@@ -175,24 +296,23 @@ public class DataJenks extends Hashed {
             return true;
         }
 
-        if (!(o instanceof DataJenks dataJenks)) {
+        if (!(o instanceof DataJenks that)) {
             return false;
         }
 
-        return new EqualsBuilder().append(population, dataJenks.population)
-                                  .append(area, dataJenks.area)
-                                  .append(density, dataJenks.density)
-                                  .append(birth, dataJenks.birth)
-                                  .append(death, dataJenks.death)
-                                  .append(birthPerCapita, dataJenks.birthPerCapita)
-                                  .append(deathPerCapita, dataJenks.deathPerCapita)
+        return new EqualsBuilder().append(population, that.population)
+                                  .append(area, that.area)
+                                  .append(density, that.density)
+                                  .append(birth, that.birth)
+                                  .append(death, that.death)
+                                  .append(birthPerCapita, that.birthPerCapita)
+                                  .append(deathPerCapita, that.deathPerCapita)
                                   .isEquals();
     }
 
     @Override
     public int hashCode() {
-        return new HashCodeBuilder(17, 37)
-                                          .append(population)
+        return new HashCodeBuilder(17, 37).append(population)
                                           .append(area)
                                           .append(density)
                                           .append(birth)
