@@ -5,21 +5,25 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang3.StringUtils;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public record DeathHistoryImportLine(@JsonProperty("CODGEO") String id, @JsonProperty("DECESD21") Integer decesd21, @JsonProperty("DECESD20") Integer decesd20,
-                                     @JsonProperty("DECESD19") Integer decesd19, @JsonProperty("DECESD18") Integer decesd18,
-                                     @JsonProperty("DECESD17") Integer decesd17, @JsonProperty("DECESD16") Integer decesd16,
-                                     @JsonProperty("DECESD15") Integer decesd15, @JsonProperty("DECESD14") Integer decesd14,
-                                     @JsonProperty("DECESD13") Integer decesd13, @JsonProperty("DECESD12") Integer decesd12,
-                                     @JsonProperty("DECESD11") Integer decesd11, @JsonProperty("DECESD10") Integer decesd10,
-                                     @JsonProperty("DECESD09") Integer decesd09, @JsonProperty("DECESD08") Integer decesd08) {
+public record DeathHistoryImportLine(@JsonProperty("CODGEO") String id, @JsonProperty("DECESD22") Integer decesd22, @JsonProperty("DECESD21") Integer decesd21,
+                                     @JsonProperty("DECESD20") Integer decesd20, @JsonProperty("DECESD19") Integer decesd19,
+                                     @JsonProperty("DECESD18") Integer decesd18, @JsonProperty("DECESD17") Integer decesd17,
+                                     @JsonProperty("DECESD16") Integer decesd16, @JsonProperty("DECESD15") Integer decesd15,
+                                     @JsonProperty("DECESD14") Integer decesd14, @JsonProperty("DECESD13") Integer decesd13,
+                                     @JsonProperty("DECESD12") Integer decesd12, @JsonProperty("DECESD11") Integer decesd11,
+                                     @JsonProperty("DECESD10") Integer decesd10, @JsonProperty("DECESD09") Integer decesd09,
+                                     @JsonProperty("DECESD08") Integer decesd08) {
 
-    public DeathHistoryImportLine(@JsonProperty("CODGEO") String id, @JsonProperty("DECESD21") Integer decesd21, @JsonProperty(
-            "DECESD20") Integer decesd20, @JsonProperty("DECESD19") Integer decesd19, @JsonProperty("DECESD18") Integer decesd18, @JsonProperty(
-            "DECESD17") Integer decesd17, @JsonProperty("DECESD16") Integer decesd16, @JsonProperty("DECESD15") Integer decesd15, @JsonProperty(
-            "DECESD14") Integer decesd14, @JsonProperty("DECESD13") Integer decesd13, @JsonProperty("DECESD12") Integer decesd12, @JsonProperty(
-            "DECESD11") Integer decesd11, @JsonProperty("DECESD10") Integer decesd10, @JsonProperty("DECESD09") Integer decesd09, @JsonProperty(
-            "DECESD08") Integer decesd08) {
+    public DeathHistoryImportLine(@JsonProperty("CODGEO") String id, @JsonProperty("DECESD22") Integer decesd22, @JsonProperty("DECESD21") Integer decesd21,
+                                  @JsonProperty("DECESD20") Integer decesd20, @JsonProperty("DECESD19") Integer decesd19,
+                                  @JsonProperty("DECESD18") Integer decesd18, @JsonProperty("DECESD17") Integer decesd17,
+                                  @JsonProperty("DECESD16") Integer decesd16, @JsonProperty("DECESD15") Integer decesd15,
+                                  @JsonProperty("DECESD14") Integer decesd14, @JsonProperty("DECESD13") Integer decesd13,
+                                  @JsonProperty("DECESD12") Integer decesd12, @JsonProperty("DECESD11") Integer decesd11,
+                                  @JsonProperty("DECESD10") Integer decesd10, @JsonProperty("DECESD09") Integer decesd09,
+                                  @JsonProperty("DECESD08") Integer decesd08) {
         this.id = StringUtils.normalizeSpace(StringUtils.trimToNull(id));
+        this.decesd22 = decesd22;
         this.decesd21 = decesd21;
         this.decesd20 = decesd20;
         this.decesd19 = decesd19;

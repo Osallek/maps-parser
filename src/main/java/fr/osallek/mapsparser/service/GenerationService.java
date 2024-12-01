@@ -45,9 +45,9 @@ public abstract class GenerationService {
         return sourceUrl;
     }
 
-    protected Mono<Void> downloadToFile(Supplier<Flux<DataBuffer>> supplier, Path dest) {
+    protected Mono<Boolean> downloadToFile(Supplier<Flux<DataBuffer>> supplier, Path dest) {
         if (this.environment.matchesProfiles("dev") && Files.exists(dest)) {
-            return Mono.empty();
+            return Mono.just(false);
         } else {
             return Mono.create(sink -> {
                 try {
@@ -64,7 +64,7 @@ public abstract class GenerationService {
                 } catch (IOException e) {
                     sink.error(e);
                 }
-            });
+            }).then(Mono.just(true));
         }
     }
 }

@@ -40,7 +40,7 @@ public class PopulationGenerationService extends GenerationService {
         try {
             if (MapUtils.isNotEmpty(data.getCommunes().getCommunes())) {
                 try (FileInputStream fileInputStream = new FileInputStream(
-                        Constants.SOURCES_FOLDER.resolve("pop").resolve("populationHistory-1876-2020.csv.gz").toFile());
+                        Constants.SOURCES_FOLDER.resolve("pop").resolve("base_pop_historiques.csv.gz").toFile());
                      GZIPInputStream gzipInputStream = new GZIPInputStream(fileInputStream);
                      InputStreamReader streamReader = new InputStreamReader(gzipInputStream, StandardCharsets.ISO_8859_1);
                      MappingIterator<PopulationHistoryImportLine> it = this.reader.readValues(streamReader)) {
@@ -72,6 +72,7 @@ public class PopulationGenerationService extends GenerationService {
                             }
 
                             if (commune != null) {
+                                commune.addPopulation(2021, current.pmun21());
                                 commune.addPopulation(2020, current.pmun20());
                                 commune.addPopulation(2019, current.pmun19());
                                 commune.addPopulation(2018, current.pmun18());

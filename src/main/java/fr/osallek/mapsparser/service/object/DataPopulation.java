@@ -188,7 +188,7 @@ public class DataPopulation extends Hashed {
         if (population != null) {
             this.population.compute(year, (y, old) -> ObjectUtils.defaultIfNull(old, 0) + ObjectUtils.defaultIfNull(population, 0));
 
-            if (area != null) {
+            if (area != null && area.compareTo(BigDecimal.ZERO) > 0) {
                 this.density.put(year, BigDecimal.valueOf(this.population.get(year)).divide(area, 1, RoundingMode.FLOOR));
             }
         }

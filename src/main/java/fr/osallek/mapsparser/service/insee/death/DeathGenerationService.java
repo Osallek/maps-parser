@@ -40,7 +40,7 @@ public class DeathGenerationService extends GenerationService {
         try {
             if (MapUtils.isNotEmpty(data.getCommunes().getCommunes())) {
                 try (FileInputStream fileInputStream = new FileInputStream(
-                        Constants.SOURCES_FOLDER.resolve("death").resolve("base_deces_2021.csv.gz").toFile());
+                        Constants.SOURCES_FOLDER.resolve("death").resolve("base_deces.csv.gz").toFile());
                      GZIPInputStream gzipInputStream = new GZIPInputStream(fileInputStream);
                      InputStreamReader streamReader = new InputStreamReader(gzipInputStream, StandardCharsets.ISO_8859_1);
                      MappingIterator<DeathHistoryImportLine> it = this.reader.readValues(streamReader)) {
@@ -57,6 +57,7 @@ public class DeathGenerationService extends GenerationService {
                             }
 
                             if (commune != null) {
+                                commune.getPopulation().addDeath(2022, current.decesd22());
                                 commune.getPopulation().addDeath(2021, current.decesd21());
                                 commune.getPopulation().addDeath(2020, current.decesd20());
                                 commune.getPopulation().addDeath(2019, current.decesd19());

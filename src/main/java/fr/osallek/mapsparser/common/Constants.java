@@ -1,8 +1,5 @@
 package fr.osallek.mapsparser.common;
 
-import jnr.ffi.LibraryLoader;
-import jnr.ffi.LibraryOption;
-import jnr.ffi.Platform;
 import org.slf4j.Logger;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.web.reactive.function.client.ClientRequest;
@@ -14,8 +11,6 @@ import java.nio.file.Path;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
-import java.util.Map;
 
 public final class Constants {
 

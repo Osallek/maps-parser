@@ -41,7 +41,7 @@ public class BirthGenerationService extends GenerationService {
             //Todo brith/death per capita
             if (MapUtils.isNotEmpty(data.getCommunes().getCommunes())) {
                 try (FileInputStream fileInputStream = new FileInputStream(
-                        Constants.SOURCES_FOLDER.resolve("birth").resolve("base_naissances_2021.csv.gz").toFile());
+                        Constants.SOURCES_FOLDER.resolve("birth").resolve("base_naissances.csv.gz").toFile());
                      GZIPInputStream gzipInputStream = new GZIPInputStream(fileInputStream);
                      InputStreamReader streamReader = new InputStreamReader(gzipInputStream, StandardCharsets.ISO_8859_1);
                      MappingIterator<BirthHistoryImportLine> it = this.reader.readValues(streamReader)) {
@@ -58,6 +58,7 @@ public class BirthGenerationService extends GenerationService {
                             }
 
                             if (commune != null) {
+                                commune.getPopulation().addBirth(2022, current.naisd22());
                                 commune.getPopulation().addBirth(2021, current.naisd21());
                                 commune.getPopulation().addBirth(2020, current.naisd20());
                                 commune.getPopulation().addBirth(2019, current.naisd19());

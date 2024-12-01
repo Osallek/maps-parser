@@ -7,6 +7,7 @@ import com.fasterxml.jackson.core.json.JsonWriteFeature;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.deser.std.NumberDeserializers;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.dataformat.csv.CsvGenerator;
@@ -18,6 +19,7 @@ import com.fasterxml.jackson.datatype.jsr310.deser.key.LocalDateTimeKeyDeseriali
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import fr.osallek.mapsparser.common.Constants;
+import fr.osallek.mapsparser.common.IntegerDeserializer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -41,6 +43,7 @@ public class JacksonConfig {
         simpleModule.addDeserializer(LocalDate.class, new LocalDateDeserializer(DateTimeFormatter.ISO_DATE));
         simpleModule.addKeyDeserializer(LocalDate.class, LocalDateKeyDeserializer.INSTANCE);
         simpleModule.addKeyDeserializer(LocalDateTime.class, LocalDateTimeKeyDeserializer.INSTANCE);
+        simpleModule.addDeserializer(Integer.class, new IntegerDeserializer());
 
         return JsonMapper.builder()
                          .findAndAddModules()
@@ -58,8 +61,18 @@ public class JacksonConfig {
 
     @Bean
     public CsvMapper csvMapper() {
+        SimpleModule simpleModule = new SimpleModule();
+        simpleModule.addSerializer(new LocalDateTimeSerializer(Constants.DATE_TIME_FORMATTER));
+        simpleModule.addDeserializer(LocalDateTime.class, new LocalDateTimeDeserializer(Constants.DATE_TIME_FORMATTER));
+        simpleModule.addSerializer(new LocalDateSerializer(DateTimeFormatter.ISO_DATE));
+        simpleModule.addDeserializer(LocalDate.class, new LocalDateDeserializer(DateTimeFormatter.ISO_DATE));
+        simpleModule.addKeyDeserializer(LocalDate.class, LocalDateKeyDeserializer.INSTANCE);
+        simpleModule.addKeyDeserializer(LocalDateTime.class, LocalDateTimeKeyDeserializer.INSTANCE);
+        simpleModule.addDeserializer(Integer.class, new IntegerDeserializer());
+
         return CsvMapper.builder()
                         .findAndAddModules()
+                        .addModule(simpleModule)
                         .enable(CsvGenerator.Feature.ALWAYS_QUOTE_STRINGS)
                         .enable(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES)
                         .build();

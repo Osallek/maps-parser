@@ -70,9 +70,9 @@ public class Data extends Hashed {
 
     @Override
     public void initHash() {
-        this.communes.initHash();
-        this.departements.initHash();
-        this.regions.initHash();
+        getCommunes().initHash();
+        getDepartements().initHash();
+        getRegions().initHash();
         super.initHash();
     }
 
