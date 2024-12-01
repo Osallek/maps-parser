@@ -186,6 +186,9 @@ public class InternPopGenerationService extends GenerationService {
                                                                departementsDatas.get(commune.getDepartement()).get(year), pop.doubleValue()));
 
                         if (totalDepartementsData.containsKey(departement.getId()) && totalDepartementsData.get(departement.getId()).containsKey(year)) {
+                            if (totalDepartementsData.get(departement.getId()).get(year).equals(BigDecimal.ZERO)) {
+                                int i = 0;
+                            }
                             departementPercentConsumer.accept(commune.getPopulation(), year, BigDecimal.valueOf(pop)
                                                                                                        .multiply(BigDecimal.valueOf(100))
                                                                                                        .divide(totalDepartementsData.get(departement.getId())

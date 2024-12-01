@@ -1,4 +1,4 @@
-package fr.osallek.mapsparser.service.gouv;
+package fr.osallek.mapsparser.service.gouv.point;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.osallek.mapsparser.common.Constants;
@@ -12,7 +12,6 @@ import org.springframework.core.annotation.Order;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpStatusCode;
-import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.io.IOException;
@@ -23,7 +22,7 @@ import java.util.List;
 import java.util.function.Predicate;
 import java.util.zip.GZIPInputStream;
 
-@Service
+//@Service
 @Order(5)
 public class PointGenerationService extends GenerationService {
 

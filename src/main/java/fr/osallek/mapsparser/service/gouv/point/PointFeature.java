@@ -1,4 +1,4 @@
-package fr.osallek.mapsparser.service.gouv;
+package fr.osallek.mapsparser.service.gouv.point;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;

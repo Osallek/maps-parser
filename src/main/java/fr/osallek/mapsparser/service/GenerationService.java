@@ -2,6 +2,7 @@ package fr.osallek.mapsparser.service;
 
 import fr.osallek.mapsparser.common.MyGZIPOutputStream;
 import fr.osallek.mapsparser.service.object.Data;
+import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.env.Environment;
@@ -51,6 +52,7 @@ public abstract class GenerationService {
         } else {
             return Mono.create(sink -> {
                 try {
+                    FileUtils.forceMkdirParent(dest.toFile());
                     OutputStream outputStream = Files.newOutputStream(dest);
                     BufferedOutputStream buffered = new BufferedOutputStream(outputStream);
                     GZIPOutputStream gzip = new MyGZIPOutputStream(buffered);
